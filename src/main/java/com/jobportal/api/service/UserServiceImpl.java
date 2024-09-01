@@ -2,9 +2,11 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
+import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.repository.UserRepository;
-import com.jobportal.api.request.RegisterRequest;
-import com.jobportal.api.response.UserResponse;
+import com.jobportal.api.dto.request.LoginRequest;
+import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.dto.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +16,12 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -31,35 +35,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse checkRegister(User theUser) {
-        UserResponse response = new UserResponse();
-
-        // Kiểm tra các trường bắt buộc có null không
-        if (theUser.getEmail().isEmpty() || theUser.getFullName().isEmpty() || theUser.getPassword().isEmpty()) {
-            response.setError(true);
-            response.setMessage("Invalid user: Email, full name, and password must not be empty.");
-            return response;
-        }
-
-        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
-        boolean emailExists = userRepository.existsByEmail(theUser.getEmail());
-
-        if (emailExists) {
-            throw new RuntimeException("Email already exists");
-        }
-
-        return response;
-    }
-
-    @Override
-    public UserResponse login(String email, String password) {
-        UserResponse response = new UserResponse();
+    public ApiResponse<UserDTO> login(LoginRequest loginRequest) {
+        ApiResponse<UserDTO> response = new ApiResponse<>();
 
         // Tìm người dùng theo email
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(loginRequest.getEmail());
 
         // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
-        if (user == null || !user.getPassword().equals(password)) {
+        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
             response.setError(true);
             response.setMessage("Invalid email or password");
             return response;
@@ -68,22 +51,27 @@ public class UserServiceImpl implements UserService {
         // Nếu người dùng tồn tại và mật khẩu khớp
         response.setError(false);
         response.setMessage("Login successfully");
-        UserDTO userDTO = UserDTO.fromUser(user);
-        response.setUserDTO(userDTO);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        response.setResult(userDTO);
 
         return response;
     }
 
     @Override
-    public UserResponse register(RegisterRequest registerRequest) {
-        User theUser = User.fromRegisterRequest(registerRequest);
+    public ApiResponse<UserDTO> register(RegisterRequest registerRequest) {
+        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
+        boolean emailExists = userRepository.existsByEmail(registerRequest.getEmail());
 
-        UserResponse response = checkRegister(theUser);
+        ApiResponse<UserDTO> response = new ApiResponse<>();
 
         // Nếu thông tin trùng lặp
-        if (response.isError()) {
+        if (emailExists) {
+            response.setError(true);
+            response.setMessage("Email already exists");
             return response;
         }
+
+        User theUser = userMapper.registerRequestToUser(registerRequest);
 
         // Xử lý thông tin người dùng mới
         theUser.setId(0); // ID sẽ được thiết lập bởi cơ sở dữ liệu
@@ -94,8 +82,8 @@ public class UserServiceImpl implements UserService {
         // Tạo phản hồi thành công
         response.setError(false);
         response.setMessage("Register successfully");
-        UserDTO userDTO = UserDTO.fromUser(dbUser);
-        response.setUserDTO(userDTO);
+        UserDTO userDTO = userMapper.userToUserDTO(dbUser);
+        response.setResult(userDTO);
 
         return response;
     }

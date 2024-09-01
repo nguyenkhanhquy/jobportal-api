@@ -1,4 +1,4 @@
-package com.jobportal.api.response;
+package com.jobportal.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.jobportal.api.dto.user.UserDTO;

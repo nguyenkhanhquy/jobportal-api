@@ -1,6 +1,6 @@
 package com.jobportal.api.exception;
 
-import com.jobportal.api.response.CommonResponse;
+import com.jobportal.api.dto.response.CommonResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,11 +14,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<CommonResponse> handleRuntimeException(RuntimeException e) {
-        return new ResponseEntity<>(new CommonResponse(true, e.getMessage()), HttpStatus.BAD_REQUEST);
+        CommonResponse response = new CommonResponse();
+        response.setError(true);
+        response.setMessage(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CommonResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        return new ResponseEntity<>(new CommonResponse(true, Objects.requireNonNull(e.getFieldError()).getDefaultMessage()), HttpStatus.BAD_REQUEST);
+        CommonResponse response = new CommonResponse();
+        response.setError(true);
+        response.setMessage(Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

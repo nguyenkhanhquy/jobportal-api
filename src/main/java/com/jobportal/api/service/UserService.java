@@ -1,8 +1,10 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
-import com.jobportal.api.request.RegisterRequest;
-import com.jobportal.api.response.UserResponse;
+import com.jobportal.api.dto.request.LoginRequest;
+import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.dto.response.ApiResponse;
 
 import java.util.List;
 
@@ -12,9 +14,7 @@ public interface UserService {
 
     Boolean CheckEmailExists(String email);
 
-    UserResponse checkRegister(User theUser);
+    ApiResponse<UserDTO> login(LoginRequest loginRequest);
 
-    UserResponse login(String userName, String password);
-
-    UserResponse register(RegisterRequest registerRequest);
+    ApiResponse<UserDTO> register(RegisterRequest registerRequest);
 }

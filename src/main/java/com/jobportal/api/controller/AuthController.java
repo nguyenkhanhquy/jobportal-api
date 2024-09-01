@@ -1,10 +1,10 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.entity.user.User;
-import com.jobportal.api.request.LoginRequest;
-import com.jobportal.api.request.RegisterRequest;
-import com.jobportal.api.response.CommonResponse;
-import com.jobportal.api.response.UserResponse;
+import com.jobportal.api.dto.user.UserDTO;
+import com.jobportal.api.dto.request.LoginRequest;
+import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.dto.response.ApiResponse;
+import com.jobportal.api.dto.response.CommonResponse;
 import com.jobportal.api.service.EmailService;
 import com.jobportal.api.service.OtpService;
 import com.jobportal.api.service.UserService;
@@ -31,50 +31,56 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest loginRequest) {
-        UserResponse response = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+    public ResponseEntity<ApiResponse<UserDTO>> login(@Valid @RequestBody LoginRequest loginRequest) {
+        ApiResponse<UserDTO> response = userService.login(loginRequest);
 
         if (response.isError()) {
-            // Thông tin đăng nhập không chính xác, trả về phản hồi với mã trạng thái UNAUTHORIZED
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
-        // Tạo phản hồi thành công
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        UserResponse response = userService.register(registerRequest);
+    public ResponseEntity<ApiResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        ApiResponse<UserDTO> response = userService.register(registerRequest);
 
         if (response.isError()) {
-            // Thông tin trùng lặp, trả về phản hồi với mã trạng thái CONFLICT
             return new ResponseEntity<>(response, HttpStatus.CONFLICT);
         }
 
-        // Tạo phản hồi thành công
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<CommonResponse> forgotPassword(@RequestParam("email") String email) {
+        CommonResponse response = new CommonResponse();
         if (userService.CheckEmailExists(email)) {
             int otp = otpService.generateOtp(email);
             emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
-            return new ResponseEntity<>(new CommonResponse(false, "OTP send to your email"), HttpStatus.OK);
+            response.setError(false);
+            response.setMessage("OTP send to your email");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else {
-            return new ResponseEntity<>(new CommonResponse(true, "Email does not exist in the system"), HttpStatus.NOT_FOUND);
+            response.setError(true);
+            response.setMessage("Email does not exist in the system");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/validate-otp")
     public ResponseEntity<CommonResponse> validateOtp(@RequestParam("email") String email,
                                                       @RequestParam("otp") int otp) {
+        CommonResponse response = new CommonResponse();
         if (otpService.validateOtp(email, otp)) {
-            return new ResponseEntity<>(new CommonResponse(false, "OTP is valid. You can now reset your password"), HttpStatus.OK);
+            response.setError(false);
+            response.setMessage("OTP is valid. You can now reset your password");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new CommonResponse(true, "Invalid OTP or OTP expired"), HttpStatus.UNAUTHORIZED);
+            response.setError(true);
+            response.setMessage("Invalid OTP or OTP expired");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 }

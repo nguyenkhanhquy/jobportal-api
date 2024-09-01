@@ -1,6 +1,7 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.entity.user.User;
+import com.jobportal.api.dto.response.ApiResponse;
 import com.jobportal.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Điều khiển các yêu cầu liên quan đến người dùng.
- */
 @RestController
 @RequestMapping("/api/v0/users")
 public class UserController {
@@ -23,14 +21,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    /**
-     * Lấy danh sách tất cả người dùng.
-     *
-     * @return danh sách người dùng
-     */
     @GetMapping
-    public ResponseEntity<List<User>> findAll() {
+    public ResponseEntity<ApiResponse<List<User>>> findAll() {
         List<User> users = userService.findAll();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        ApiResponse<List<User>> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(users);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

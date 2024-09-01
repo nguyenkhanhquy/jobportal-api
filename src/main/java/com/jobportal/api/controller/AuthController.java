@@ -1,5 +1,6 @@
 package com.jobportal.api.controller;
 
+import com.jobportal.api.dto.response.UserResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
@@ -83,5 +84,15 @@ public class AuthController {
             response.setMessage("Invalid OTP or OTP expired");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<UserResponse> resetPassword(@RequestParam("email") String email,
+                                                      @RequestParam("newPassword") String newPassword) {
+        UserResponse response = new UserResponse();
+        response.setError(false);
+        response.setMessage("Password reset successful");
+        response.setUser(userService.resetPassword(email, newPassword));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

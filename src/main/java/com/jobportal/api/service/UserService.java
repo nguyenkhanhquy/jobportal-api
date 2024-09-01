@@ -12,6 +12,10 @@ public interface UserService {
 
     List<User> findAll();
 
+    UserDTO selectUserById(Integer userId);
+
+    UserDTO resetPassword(String email, String newPassword);
+
     Boolean CheckEmailExists(String email);
 
     ApiResponse<UserDTO> login(LoginRequest loginRequest);

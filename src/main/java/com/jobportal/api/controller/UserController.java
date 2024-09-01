@@ -1,5 +1,6 @@
 package com.jobportal.api.controller;
 
+import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
 import com.jobportal.api.dto.response.ApiResponse;
 import com.jobportal.api.service.UserService;
@@ -27,5 +28,13 @@ public class UserController {
         ApiResponse<List<User>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(users);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<UserDTO>> findById(@PathVariable int userId) {
+
+        ApiResponse<UserDTO> response = new ApiResponse<>();
+        response.setResult(userService.selectUserById(userId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

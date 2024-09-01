@@ -4,7 +4,7 @@ import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
-import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.mapper.UserConverter;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
@@ -18,17 +18,37 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private final UserConverter userConverter;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserConverter userConverter) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.userConverter = userConverter;
     }
 
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public UserDTO selectUserById(Integer userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+        return userConverter.userToUserDTO(user);
+    }
+
+    @Override
+    public UserDTO resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+        user.setPassword(newPassword);
+        userRepository.save(user);
+        return userConverter.userToUserDTO(user);
     }
 
     @Override
@@ -53,7 +73,7 @@ public class UserServiceImpl implements UserService {
         // Nếu người dùng tồn tại và mật khẩu khớp
         response.setError(false);
         response.setMessage("Login successfully");
-        UserDTO userDTO = userMapper.userToUserDTO(user);
+        UserDTO userDTO = userConverter.userToUserDTO(user);
         response.setResult(userDTO);
 
         return response;
@@ -68,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
         ApiResponse<UserDTO> response = new ApiResponse<>();
 
-        User theUser = userMapper.registerRequestToUser(registerRequest);
+        User theUser = userConverter.registerRequestToUser(registerRequest);
 
         // Xử lý thông tin người dùng mới
         theUser.setId(0); // ID sẽ được thiết lập bởi cơ sở dữ liệu
@@ -79,7 +99,7 @@ public class UserServiceImpl implements UserService {
         // Tạo phản hồi thành công
         response.setError(false);
         response.setMessage("Register successfully");
-        UserDTO userDTO = userMapper.userToUserDTO(dbUser);
+        UserDTO userDTO = userConverter.userToUserDTO(dbUser);
         response.setResult(userDTO);
 
         return response;

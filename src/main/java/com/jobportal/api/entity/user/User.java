@@ -5,11 +5,11 @@ import lombok.*;
 
 @Entity
 @Table(name = "user")
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -20,7 +20,7 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "password")

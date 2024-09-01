@@ -1,5 +1,6 @@
 package com.jobportal.api.entity.user;
 
+import com.jobportal.api.request.RegisterRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,4 +26,13 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    // Phương thức tĩnh để chuyển đổi từ RegisterRequest sang User
+    public static User fromRegisterRequest(RegisterRequest registerRequest) {
+        User user = new User();
+        user.setFullName(registerRequest.getFullName());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(registerRequest.getPassword());
+        return user;
+    }
 }

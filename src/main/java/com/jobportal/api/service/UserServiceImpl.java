@@ -3,6 +3,7 @@ package com.jobportal.api.service;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
 import com.jobportal.api.repository.UserRepository;
+import com.jobportal.api.request.RegisterRequest;
 import com.jobportal.api.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,7 +75,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse register(User theUser) {
+    public UserResponse register(RegisterRequest registerRequest) {
+        User theUser = User.fromRegisterRequest(registerRequest);
+
         UserResponse response = checkRegister(theUser);
 
         // Nếu thông tin trùng lặp

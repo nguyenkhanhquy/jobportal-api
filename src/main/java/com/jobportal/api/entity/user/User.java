@@ -1,6 +1,5 @@
 package com.jobportal.api.entity.user;
 
-import com.jobportal.api.dto.request.RegisterRequest;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -12,12 +12,24 @@ import java.util.Objects;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<CommonResponse> handleRuntimeException(RuntimeException e) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<CommonResponse> handleException(Exception e) {
         CommonResponse response = new CommonResponse();
         response.setError(true);
-        response.setMessage(e.getMessage());
+        response.setMessage("Uncategorized Exception: " + e.getMessage());
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<CommonResponse> handleCustomException(CustomException e) {
+        EnumException enumException = e.getEnumException();
+
+        CommonResponse response = new CommonResponse();
+        response.setError(true);
+        response.setMessage(enumException.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.valueOf(enumException.getErrorCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -12,5 +12,5 @@ public class UserResponse {
 
     private boolean error;
     private String message;
-    private UserDTO userDTO;
+    private UserDTO user;
 }

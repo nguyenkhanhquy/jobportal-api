@@ -2,6 +2,8 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
+import com.jobportal.api.exception.CustomException;
+import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.dto.request.LoginRequest;
@@ -60,16 +62,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public ApiResponse<UserDTO> register(RegisterRequest registerRequest) {
         // Kiểm tra xem email đã tồn tại trong hệ thống chưa
-        boolean emailExists = userRepository.existsByEmail(registerRequest.getEmail());
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new CustomException(EnumException.USER_EXISTED);
+        }
 
         ApiResponse<UserDTO> response = new ApiResponse<>();
-
-        // Nếu thông tin trùng lặp
-        if (emailExists) {
-            response.setError(true);
-            response.setMessage("Email already exists");
-            return response;
-        }
 
         User theUser = userMapper.registerRequestToUser(registerRequest);
 

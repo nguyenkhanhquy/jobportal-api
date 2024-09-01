@@ -5,6 +5,8 @@ import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
 import com.jobportal.api.dto.response.ApiResponse;
 import com.jobportal.api.dto.response.CommonResponse;
+import com.jobportal.api.exception.CustomException;
+import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.service.EmailService;
 import com.jobportal.api.service.OtpService;
 import com.jobportal.api.service.UserService;
@@ -54,18 +56,17 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<CommonResponse> forgotPassword(@RequestParam("email") String email) {
-        CommonResponse response = new CommonResponse();
         if (userService.CheckEmailExists(email)) {
             int otp = otpService.generateOtp(email);
             emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
+
+            CommonResponse response = new CommonResponse();
             response.setError(false);
             response.setMessage("OTP send to your email");
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         else {
-            response.setError(true);
-            response.setMessage("Email does not exist in the system");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            throw new CustomException(EnumException.USER_NOT_FOUND);
         }
     }
 

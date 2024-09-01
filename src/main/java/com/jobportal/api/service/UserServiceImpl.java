@@ -25,7 +25,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse checkInfo(User theUser) {
+    public Boolean CheckEmailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public UserResponse checkRegister(User theUser) {
         UserResponse response = new UserResponse();
 
         // Kiểm tra các trường bắt buộc có null không
@@ -39,11 +44,7 @@ public class UserServiceImpl implements UserService {
         boolean emailExists = userRepository.existsByEmail(theUser.getEmail());
 
         if (emailExists) {
-            response.setError(true);
-            response.setMessage("Email already exists");
-        } else {
-            response.setError(false);
-            response.setMessage("Info is not duplicated");
+            throw new RuntimeException("Email already exists");
         }
 
         return response;
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse register(User theUser) {
-        UserResponse response = checkInfo(theUser);
+        UserResponse response = checkRegister(theUser);
 
         // Nếu thông tin trùng lặp
         if (response.isError()) {

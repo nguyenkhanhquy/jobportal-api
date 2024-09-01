@@ -2,6 +2,7 @@ package com.jobportal.api.controller;
 
 import com.jobportal.api.entity.user.User;
 import com.jobportal.api.request.LoginRequest;
+import com.jobportal.api.response.CommonResponse;
 import com.jobportal.api.response.UserResponse;
 import com.jobportal.api.service.EmailService;
 import com.jobportal.api.service.OtpService;
@@ -71,10 +72,15 @@ public class AuthController {
      * @return thông báo xác nhận rằng mã OTP đã được gửi
      */
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam("email") String email) {
-        int otp = otpService.generateOtp(email);
-        emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
-        return "OTP send to your email";
+    public ResponseEntity<CommonResponse> forgotPassword(@RequestParam("email") String email) {
+        if (userService.CheckEmailExists(email)) {
+            int otp = otpService.generateOtp(email);
+            emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
+            return new ResponseEntity<>(new CommonResponse(false, "OTP send to your email"), HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(new CommonResponse(true, "Email does not exist in the system"), HttpStatus.NOT_FOUND);
+        }
     }
 
     /**
@@ -85,12 +91,12 @@ public class AuthController {
      * @return thông báo xác nhận rằng mã OTP hợp lệ hoặc thông báo lỗi nếu mã OTP không hợp lệ hoặc đã hết hạn
      */
     @PostMapping("/validate-otp")
-    public String validateOtp(@RequestParam("email") String email,
-                              @RequestParam("otp") int otp) {
+    public ResponseEntity<CommonResponse> validateOtp(@RequestParam("email") String email,
+                                                      @RequestParam("otp") int otp) {
         if (otpService.validateOtp(email, otp)) {
-            return "OTP is valid. You can now reset your password";
+            return new ResponseEntity<>(new CommonResponse(false, "OTP is valid. You can now reset your password"), HttpStatus.OK);
         } else {
-            return "Invalid OTP or OTP expired";
+            return new ResponseEntity<>(new CommonResponse(true, "Invalid OTP or OTP expired"), HttpStatus.UNAUTHORIZED);
         }
     }
 }

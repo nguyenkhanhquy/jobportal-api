@@ -9,7 +9,9 @@ public interface UserService {
 
     List<User> findAll();
 
-    UserResponse checkInfo(User theUser);
+    Boolean CheckEmailExists(String email);
+
+    UserResponse checkRegister(User theUser);
 
     UserResponse login(String userName, String password);
 

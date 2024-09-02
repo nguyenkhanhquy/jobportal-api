@@ -13,6 +13,8 @@ import com.jobportal.api.dto.request.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -48,6 +50,9 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> createUser(UserDTO userDTO) {
         User user = userMapper.mapUserDTOToUser(userDTO);
         user.setId(0L); // cast argument to 'long' 0 -> 0L
+        // Mã hóa mật khẩu với Bcrypt
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return new ResponseEntity<>(userRepository.save(user), HttpStatus.valueOf(200));
     }
 
@@ -69,20 +74,20 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
         // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
-        if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
-            errorResponse.setMessage("Invalid email or password");
-            // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
-            return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            SuccessResponse<UserDTO> response = new SuccessResponse<>();
+            response.setResult(userMapper.mapUserToUserDTO(user));
+            response.setMessage("Login successfully");
+            // 200 : Success
+            return new ResponseEntity<>(response, HttpStatus.valueOf(200));
         }
 
-        // Nếu người dùng tồn tại và mật khẩu khớp
-        SuccessResponse<UserDTO> response = new SuccessResponse<>();
-        response.setResult(userMapper.mapUserToUserDTO(user));
-        response.setMessage("Login successfully");
-        // 200 : Success
-        return new ResponseEntity<>(response, HttpStatus.valueOf(200));
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
+        errorResponse.setMessage("Invalid email or password");
+        // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
+        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
     }
 
     @Override
@@ -95,6 +100,9 @@ public class UserServiceImpl implements UserService {
         // Lưu người dùng vào cơ sở dữ liệu
         User user = userMapper.registerRequestToUser(registerRequest);
         user.setId(0L); // cast argument to 'long' 0 -> 0L
+        // Mã hóa mật khẩu với Bcrypt
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         User dbUser = userRepository.save(user);
 
         // Tạo phản hồi thành công

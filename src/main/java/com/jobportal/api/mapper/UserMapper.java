@@ -6,13 +6,23 @@ import com.jobportal.api.entity.user.User;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserConverter {
+public class UserMapper {
 
-    public UserDTO userToUserDTO(User user) {
+    public User mapUserDTOToUser(UserDTO userDTO) {
+        User user = new User();
+        user.setId(userDTO.getId());
+        user.setFullName(userDTO.getFullName());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(userDTO.getPassword());
+        return user;
+    }
+
+    public UserDTO mapUserToUserDTO(User user) {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setFullName(user.getFullName());
         userDTO.setEmail(user.getEmail());
+        userDTO.setPassword(user.getPassword());
         return userDTO;
     }
 

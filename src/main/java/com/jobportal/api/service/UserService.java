@@ -1,24 +1,27 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.user.UserDTO;
-import com.jobportal.api.entity.user.User;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
-import com.jobportal.api.dto.response.ApiResponse;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public interface UserService {
 
-    List<User> findAll();
+    ResponseEntity<?> getAllUsers();
 
-    UserDTO selectUserById(Integer userId);
+    ResponseEntity<?> getUserById(Long id);
 
-    UserDTO resetPassword(String email, String newPassword);
+    ResponseEntity<?> createUser(UserDTO userDTO);
+
+    ResponseEntity<?> updateUser(UserDTO userDTO);
+
+    ResponseEntity<?> removeUserById(Long id);
+
+    ResponseEntity<?> login(LoginRequest loginRequest);
+
+    ResponseEntity<?> register(RegisterRequest registerRequest);
+
+    ResponseEntity<?> resetPassword(String email, String newPassword);
 
     Boolean CheckEmailExists(String email);
-
-    ApiResponse<UserDTO> login(LoginRequest loginRequest);
-
-    ApiResponse<UserDTO> register(RegisterRequest registerRequest);
 }

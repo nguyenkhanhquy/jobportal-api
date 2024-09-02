@@ -1,11 +1,9 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.response.UserResponse;
-import com.jobportal.api.dto.user.UserDTO;
+import com.jobportal.api.dto.response.ErrorResponse;
+import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
-import com.jobportal.api.dto.response.ApiResponse;
-import com.jobportal.api.dto.response.CommonResponse;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.service.EmailService;
@@ -32,67 +30,53 @@ public class AuthController {
         this.emailService = emailService;
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserDTO>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        ApiResponse<UserDTO> response = userService.login(loginRequest);
-
-        if (response.isError()) {
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return userService.login(loginRequest);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        ApiResponse<UserDTO> response = userService.register(registerRequest);
-
-        if (response.isError()) {
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        return userService.register(registerRequest);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<CommonResponse> forgotPassword(@RequestParam("email") String email) {
+    public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
         if (userService.CheckEmailExists(email)) {
             int otp = otpService.generateOtp(email);
             emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
 
-            CommonResponse response = new CommonResponse();
-            response.setError(false);
-            response.setMessage("OTP send to your email");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            SuccessResponse<?> successResponse = new SuccessResponse<>();
+            successResponse.setMessage("OTP send to your email");
+            // 200 : Success
+            return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
         }
         else {
+            // 404: Not found — không tồn tại resource
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
     }
 
     @PostMapping("/validate-otp")
-    public ResponseEntity<CommonResponse> validateOtp(@RequestParam("email") String email,
+    public ResponseEntity<?> validateOtp(@RequestParam("email") String email,
                                                       @RequestParam("otp") int otp) {
-        CommonResponse response = new CommonResponse();
         if (otpService.validateOtp(email, otp)) {
-            response.setError(false);
-            response.setMessage("OTP is valid. You can now reset your password");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            SuccessResponse<?> successResponse = new SuccessResponse<>();
+            successResponse.setMessage("OTP is valid. You can now reset your password");
+            // 200 : Success
+            return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
         } else {
-            response.setError(true);
-            response.setMessage("Invalid OTP or OTP expired");
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
+            errorResponse.setMessage("Invalid OTP or OTP expired");
+            // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
+            return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<UserResponse> resetPassword(@RequestParam("email") String email,
-                                                      @RequestParam("newPassword") String newPassword) {
-        UserResponse response = new UserResponse();
-        response.setError(false);
-        response.setMessage("Password reset successful");
-        response.setUser(userService.resetPassword(email, newPassword));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<?> resetPassword(@RequestParam("email") String email,
+                                           @RequestParam("newPassword") String newPassword) {
+        return userService.resetPassword(email, newPassword);
     }
 }

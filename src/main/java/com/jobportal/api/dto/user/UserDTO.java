@@ -1,13 +1,20 @@
 package com.jobportal.api.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDTO {
 
-    private int id;
+    private Long id;
     private String email;
     private String fullName;
+    private String password;
 }

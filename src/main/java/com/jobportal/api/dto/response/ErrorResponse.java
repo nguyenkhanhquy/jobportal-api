@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse <T> {
+public class ErrorResponse {
 
-    private boolean error = false;
+    private final boolean error = true;
+    private int errorCode;
     private String message;
-    private T result;
 }

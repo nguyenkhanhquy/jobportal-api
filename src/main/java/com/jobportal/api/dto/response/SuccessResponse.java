@@ -1,16 +1,15 @@
 package com.jobportal.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.jobportal.api.dto.user.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse {
+public class SuccessResponse <T> {
 
-    private boolean error;
+    private final boolean error = false;
+    private T result;
     private String message;
-    private UserDTO user;
 }

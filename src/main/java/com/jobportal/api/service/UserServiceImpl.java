@@ -1,107 +1,126 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.response.ErrorResponse;
+import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.entity.user.User;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
-import com.jobportal.api.mapper.UserConverter;
+import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
-import com.jobportal.api.dto.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserConverter userConverter;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserConverter userConverter) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
-        this.userConverter = userConverter;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public ResponseEntity<?> getAllUsers() {
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.valueOf(200));
     }
 
     @Override
-    public UserDTO selectUserById(Integer userId) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
+    public ResponseEntity<?> getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return new ResponseEntity<>(user, HttpStatus.valueOf(200));
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-        return userConverter.userToUserDTO(user);
     }
 
     @Override
-    public UserDTO resetPassword(String email, String newPassword) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
-        user.setPassword(newPassword);
-        userRepository.save(user);
-        return userConverter.userToUserDTO(user);
+    public ResponseEntity<?> createUser(UserDTO userDTO) {
+        User user = userMapper.mapUserDTOToUser(userDTO);
+        user.setId(0L); // cast argument to 'long' 0 -> 0L
+        return new ResponseEntity<>(userRepository.save(user), HttpStatus.valueOf(200));
     }
 
     @Override
-    public Boolean CheckEmailExists(String email) {
-        return userRepository.existsByEmail(email);
+    public ResponseEntity<?> updateUser(UserDTO userDTO) {
+        User user = userMapper.mapUserDTOToUser(userDTO);
+        return new ResponseEntity<>(userRepository.save(user), HttpStatus.valueOf(200));
     }
 
     @Override
-    public ApiResponse<UserDTO> login(LoginRequest loginRequest) {
-        ApiResponse<UserDTO> response = new ApiResponse<>();
+    public ResponseEntity<?> removeUserById(Long id) {
+        userRepository.deleteById(id);
+        return new ResponseEntity<>(null, HttpStatus.valueOf(200));
+    }
 
+    @Override
+    public ResponseEntity<?> login(LoginRequest loginRequest) {
         // Tìm người dùng theo email
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
         // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
         if (user == null || !user.getPassword().equals(loginRequest.getPassword())) {
-            response.setError(true);
-            response.setMessage("Invalid email or password");
-            return response;
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
+            errorResponse.setMessage("Invalid email or password");
+            // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
+            return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
         }
 
         // Nếu người dùng tồn tại và mật khẩu khớp
-        response.setError(false);
+        SuccessResponse<UserDTO> response = new SuccessResponse<>();
+        response.setResult(userMapper.mapUserToUserDTO(user));
         response.setMessage("Login successfully");
-        UserDTO userDTO = userConverter.userToUserDTO(user);
-        response.setResult(userDTO);
-
-        return response;
+        // 200 : Success
+        return new ResponseEntity<>(response, HttpStatus.valueOf(200));
     }
 
     @Override
-    public ApiResponse<UserDTO> register(RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(RegisterRequest registerRequest) {
         // Kiểm tra xem email đã tồn tại trong hệ thống chưa
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new CustomException(EnumException.USER_EXISTED);
         }
 
-        ApiResponse<UserDTO> response = new ApiResponse<>();
-
-        User theUser = userConverter.registerRequestToUser(registerRequest);
-
-        // Xử lý thông tin người dùng mới
-        theUser.setId(0); // ID sẽ được thiết lập bởi cơ sở dữ liệu
-
         // Lưu người dùng vào cơ sở dữ liệu
-        User dbUser = userRepository.save(theUser);
+        User user = userMapper.registerRequestToUser(registerRequest);
+        user.setId(0L); // cast argument to 'long' 0 -> 0L
+        User dbUser = userRepository.save(user);
 
         // Tạo phản hồi thành công
-        response.setError(false);
-        response.setMessage("Register successfully");
-        UserDTO userDTO = userConverter.userToUserDTO(dbUser);
-        response.setResult(userDTO);
+        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
+        UserDTO userDTO = userMapper.mapUserToUserDTO(dbUser);
+        successResponse.setResult(userDTO);
+        successResponse.setMessage("Register successfully");
+        // 200 : Success
+        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+    }
 
-        return response;
+    @Override
+    public ResponseEntity<?> resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            // 404: Not found — không tồn tại resource
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+        user.setPassword(newPassword);
+        userRepository.save(user);
+        // 200 : Success
+        return new ResponseEntity<>(userMapper.mapUserToUserDTO(user), HttpStatus.valueOf(200));
+    }
+
+    @Override
+    public Boolean CheckEmailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 }

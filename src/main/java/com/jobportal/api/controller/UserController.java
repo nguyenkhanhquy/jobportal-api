@@ -1,15 +1,10 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.user.UserDTO;
-import com.jobportal.api.entity.user.User;
-import com.jobportal.api.dto.response.ApiResponse;
 import com.jobportal.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v0/users")
@@ -23,18 +18,27 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<User>>> findAll() {
-        List<User> users = userService.findAll();
-        ApiResponse<List<User>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(users);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    public ResponseEntity<?> getAllUsers() {
+        return userService.getAllUsers();
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> findById(@PathVariable int userId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
+        return userService.getUserById(id);
+    }
 
-        ApiResponse<UserDTO> response = new ApiResponse<>();
-        response.setResult(userService.selectUserById(userId));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @PostMapping
+    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+        return userService.createUser(userDTO);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
+        return userService.updateUser(userDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> removeUserById(@PathVariable("id") Long id) {
+        return userService.removeUserById(id);
     }
 }

@@ -1,4 +1,4 @@
-package com.jobportal.api.entity.user;
+package com.jobportal.api.model.user;
 
 import jakarta.persistence.*;
 import lombok.*;

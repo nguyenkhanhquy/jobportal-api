@@ -2,7 +2,7 @@ package com.jobportal.api.mapper;
 
 import com.jobportal.api.dto.request.RegisterRequest;
 import com.jobportal.api.dto.user.UserDTO;
-import com.jobportal.api.entity.user.User;
+import com.jobportal.api.model.user.User;
 import org.springframework.stereotype.Component;
 
 @Component

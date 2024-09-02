@@ -3,7 +3,7 @@ package com.jobportal.api.service;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
-import com.jobportal.api.entity.user.User;
+import com.jobportal.api.model.user.User;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
@@ -77,15 +77,15 @@ public class UserServiceImpl implements UserService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             SuccessResponse<UserDTO> response = new SuccessResponse<>();
-            response.setResult(userMapper.mapUserToUserDTO(user));
             response.setMessage("Login successfully");
+            response.setResult(userMapper.mapUserToUserDTO(user));
             // 200 : Success
             return new ResponseEntity<>(response, HttpStatus.valueOf(200));
         }
 
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
         errorResponse.setMessage("Invalid email or password");
+        errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
         // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
     }
@@ -116,15 +116,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<?> resetPassword(String email, String newPassword) {
+        // Kiểm tra xem newPassword có hợp lệ không
+        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 8) {
+            throw new CustomException(EnumException.INVALID_PASSWORD);
+        }
+
         User user = userRepository.findByEmail(email);
         if (user == null) {
             // 404: Not found — không tồn tại resource
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
-        user.setPassword(newPassword);
-        userRepository.save(user);
+        // Mã hóa mật khẩu với Bcrypt
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        User dbUser = userRepository.save(user);
+
+        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
+        successResponse.setResult(userMapper.mapUserToUserDTO(dbUser));
+        successResponse.setMessage("Reset password successfully");
         // 200 : Success
-        return new ResponseEntity<>(userMapper.mapUserToUserDTO(user), HttpStatus.valueOf(200));
+        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
     }
 
     @Override

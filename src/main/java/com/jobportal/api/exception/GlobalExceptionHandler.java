@@ -15,8 +15,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         ErrorResponse response = new ErrorResponse();
-        response.setErrorCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setMessage("Uncategorized Exception: " + e.getMessage());
+        response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
         EnumException enumException = e.getEnumException();
 
         ErrorResponse response = new ErrorResponse();
-        response.setErrorCode(enumException.getErrorCode());
         response.setMessage(enumException.getMessage());
+        response.setStatusCode(enumException.getErrorCode());
 
         return new ResponseEntity<>(response, HttpStatus.valueOf(enumException.getErrorCode()));
     }
@@ -36,8 +36,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         ErrorResponse response = new ErrorResponse();
 
-        response.setErrorCode(HttpStatus.BAD_REQUEST.value());
         response.setMessage(Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
+        response.setStatusCode(HttpStatus.BAD_REQUEST.value());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

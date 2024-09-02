@@ -58,8 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("/validate-otp")
-    public ResponseEntity<?> validateOtp(@RequestParam("email") String email,
-                                                      @RequestParam("otp") int otp) {
+    public ResponseEntity<?> validateOtp(@RequestParam("email") String email, @RequestParam("otp") int otp) {
         if (otpService.validateOtp(email, otp)) {
             SuccessResponse<?> successResponse = new SuccessResponse<>();
             successResponse.setMessage("OTP is valid. You can now reset your password");
@@ -67,16 +66,15 @@ public class AuthController {
             return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
         } else {
             ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setErrorCode(HttpStatus.UNAUTHORIZED.value());
             errorResponse.setMessage("Invalid OTP or OTP expired");
+            errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
             // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
             return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam("email") String email,
-                                           @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<?> resetPassword(@RequestParam("email") String email, @RequestParam("newPassword") String newPassword) {
         return userService.resetPassword(email, newPassword);
     }
 }

@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 public class SuccessResponse <T> {
 
-    private final boolean error = false;
-    private T result;
+    private final boolean success = true;
     private String message;
+    private T result;
+    private final int statusCode = 200;
 }

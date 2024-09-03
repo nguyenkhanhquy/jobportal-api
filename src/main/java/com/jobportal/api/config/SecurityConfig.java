@@ -24,14 +24,16 @@ public class SecurityConfig {
     @Value("${jwt.signerkey}")
     private String signerKey;
 
+    private final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users"};
     private final String[] PUBLIC_GET_ENDPOINTS = {"/api/v0/users"};
-    private final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**"};
+    private final String[] PUBLIC_PUT_ENDPOINTS = {"/api/v0/users"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                requests.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.PUT, PUBLIC_PUT_ENDPOINTS).permitAll()
                         .anyRequest()
                         .authenticated()
         );

@@ -1,6 +1,7 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.user.UserDTO;
+import com.jobportal.api.dto.request.CreateUserRequest;
+import com.jobportal.api.dto.request.UpdateUserRequest;
 import com.jobportal.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
-        return userService.createUser(userDTO);
+    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest createUserRequest) {
+        return userService.createUser(createUserRequest);
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
-        return userService.updateUser(userDTO);
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUser(updateUserRequest);
     }
 
     @DeleteMapping("/{id}")

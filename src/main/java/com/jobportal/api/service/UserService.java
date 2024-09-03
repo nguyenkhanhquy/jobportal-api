@@ -1,6 +1,7 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.user.UserDTO;
+import com.jobportal.api.dto.request.CreateUserRequest;
+import com.jobportal.api.dto.request.UpdateUserRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {
@@ -9,9 +10,9 @@ public interface UserService {
 
     ResponseEntity<?> getUserById(String id);
 
-    ResponseEntity<?> createUser(UserDTO userDTO);
+    ResponseEntity<?> createUser(CreateUserRequest createUserRequest);
 
-    ResponseEntity<?> updateUser(UserDTO userDTO);
+    ResponseEntity<?> updateUser(UpdateUserRequest updateUserRequest);
 
     ResponseEntity<?> removeUserById(String id);
 

@@ -1,5 +1,7 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.request.CreateUserRequest;
+import com.jobportal.api.dto.request.UpdateUserRequest;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.mapper.UserMapper;
@@ -35,30 +37,39 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> getUserById(String id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            UserDTO userDTO = userMapper.mapUserToUserDTO(user.get());
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
     @Override
-    public ResponseEntity<?> createUser(UserDTO userDTO) {
-        User user = userMapper.mapUserDTOToUser(userDTO);
+    public ResponseEntity<?> createUser(CreateUserRequest createUserRequest) {
+        User user = userMapper.mapCreateUserRequestToUser(createUserRequest);
 
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.OK);
+        userRepository.save(user);
+
+        UserDTO userDTO = userMapper.mapUserToUserDTO(user);
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<?> updateUser(UserDTO userDTO) {
-        User user = userMapper.mapUserDTOToUser(userDTO);
+    public ResponseEntity<?> updateUser(UpdateUserRequest updateUserRequest) {
+        User user = userMapper.mapUpdateUserRequestToUser(updateUserRequest);
 
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.OK);
+        userRepository.save(user);
+
+        UserDTO userDTO = userMapper.mapUserToUserDTO(user);
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
     @Override

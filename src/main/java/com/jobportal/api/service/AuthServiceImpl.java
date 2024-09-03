@@ -125,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(EnumException.USER_EXISTED);
         }
 
-        User user = userMapper.registerRequestToUser(registerRequest);
+        User user = userMapper.mapRegisterRequestToUser(registerRequest);
 
         // Mã hóa mật khẩu với Bcrypt
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);

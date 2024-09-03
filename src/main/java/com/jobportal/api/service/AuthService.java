@@ -3,6 +3,7 @@ package com.jobportal.api.service;
 import com.jobportal.api.dto.request.IntrospectRequest;
 import com.jobportal.api.dto.request.LoginRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.model.user.User;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.http.ResponseEntity;
 
@@ -18,5 +19,5 @@ public interface AuthService {
 
     ResponseEntity<?> resetPassword(String email, String newPassword);
 
-    String generateToken(String email);
+    String generateToken(User user);
 }

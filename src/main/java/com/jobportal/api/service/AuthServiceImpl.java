@@ -16,8 +16,6 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,8 +33,6 @@ import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Value("${jwt.signerkey}")
     private String SIGNER_KEY;
@@ -59,10 +55,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            String token = generateToken(loginRequest.getEmail());
-
-            // Ghi log cho sự kiện đăng nhập thành công
-            logger.info("User {} logged in successfully", loginRequest.getEmail());
+            String token = generateToken(user);
 
             SuccessResponse<Map<String, Object>> successResponse = new SuccessResponse<>();
             successResponse.setMessage("Login successfully");
@@ -70,9 +63,6 @@ public class AuthServiceImpl implements AuthService {
             // 200 : Success
             return new ResponseEntity<>(successResponse, HttpStatus.OK);
         }
-
-        // Ghi log cho sự kiện đăng nhập thất bại
-        logger.warn("Failed login attempt for user {}", loginRequest.getEmail());
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setMessage("Invalid email or password");
@@ -168,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String generateToken(String email) {
+    public String generateToken(User user) {
         // Tạo JWSHeader với "typ": "JWT" và thuật toán HS512
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS512)
                 .type(JOSEObjectType.JWT)
@@ -182,11 +172,11 @@ public class AuthServiceImpl implements AuthService {
 
         // Tạo JWTClaimsSet chứa các thông tin cần thiết
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .issuer("21110282.codes")
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(expiration))
-                .claim("customClaim", "custom")
+                .claim("scope", user.getRole())
                 .build();
 
         // Chuyển đổi JWTClaimsSet thành payload

@@ -42,4 +42,9 @@ public class UserController {
     public ResponseEntity<?> removeUserById(@PathVariable("id") String id) {
         return userService.removeUserById(id);
     }
+
+    @GetMapping("/my-info")
+    public ResponseEntity<?> getMyInfo() {
+        return userService.getCurrentUser();
+    }
 }

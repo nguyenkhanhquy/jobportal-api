@@ -1,15 +1,9 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.response.ErrorResponse;
-import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.model.user.User;
-import com.jobportal.api.exception.CustomException;
-import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.repository.UserRepository;
-import com.jobportal.api.dto.request.LoginRequest;
-import com.jobportal.api.dto.request.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,76 +60,6 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> removeUserById(Long id) {
         userRepository.deleteById(id);
         return new ResponseEntity<>(null, HttpStatus.valueOf(200));
-    }
-
-    @Override
-    public ResponseEntity<?> login(LoginRequest loginRequest) {
-        // Tìm người dùng theo email
-        User user = userRepository.findByEmail(loginRequest.getEmail());
-
-        // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            SuccessResponse<UserDTO> response = new SuccessResponse<>();
-            response.setMessage("Login successfully");
-            response.setResult(userMapper.mapUserToUserDTO(user));
-            // 200 : Success
-            return new ResponseEntity<>(response, HttpStatus.valueOf(200));
-        }
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setMessage("Invalid email or password");
-        errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-        // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
-        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
-    }
-
-    @Override
-    public ResponseEntity<?> register(RegisterRequest registerRequest) {
-        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new CustomException(EnumException.USER_EXISTED);
-        }
-
-        // Lưu người dùng vào cơ sở dữ liệu
-        User user = userMapper.registerRequestToUser(registerRequest);
-        user.setId(0L); // cast argument to 'long' 0 -> 0L
-        // Mã hóa mật khẩu với Bcrypt
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        User dbUser = userRepository.save(user);
-
-        // Tạo phản hồi thành công
-        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
-        UserDTO userDTO = userMapper.mapUserToUserDTO(dbUser);
-        successResponse.setResult(userDTO);
-        successResponse.setMessage("Register successfully");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
-    }
-
-    @Override
-    public ResponseEntity<?> resetPassword(String email, String newPassword) {
-        // Kiểm tra xem newPassword có hợp lệ không
-        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 8) {
-            throw new CustomException(EnumException.INVALID_PASSWORD);
-        }
-
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            // 404: Not found — không tồn tại resource
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
-        // Mã hóa mật khẩu với Bcrypt
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        user.setPassword(passwordEncoder.encode(newPassword));
-        User dbUser = userRepository.save(user);
-
-        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
-        successResponse.setResult(userMapper.mapUserToUserDTO(dbUser));
-        successResponse.setMessage("Reset password successfully");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
     }
 
     @Override

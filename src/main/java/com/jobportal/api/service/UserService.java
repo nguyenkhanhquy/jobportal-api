@@ -7,13 +7,13 @@ public interface UserService {
 
     ResponseEntity<?> getAllUsers();
 
-    ResponseEntity<?> getUserById(Long id);
+    ResponseEntity<?> getUserById(String id);
 
     ResponseEntity<?> createUser(UserDTO userDTO);
 
     ResponseEntity<?> updateUser(UserDTO userDTO);
 
-    ResponseEntity<?> removeUserById(Long id);
+    ResponseEntity<?> removeUserById(String id);
 
     Boolean CheckEmailExists(String email);
 }

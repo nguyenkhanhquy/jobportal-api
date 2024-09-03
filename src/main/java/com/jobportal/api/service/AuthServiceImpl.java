@@ -125,12 +125,13 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(EnumException.USER_EXISTED);
         }
 
-        // Lưu người dùng vào cơ sở dữ liệu
         User user = userMapper.registerRequestToUser(registerRequest);
-        user.setId(0L); // cast argument to 'long' 0 -> 0L
+
         // Mã hóa mật khẩu với Bcrypt
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+
+        // Lưu người dùng vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
 
         // Tạo phản hồi thành công

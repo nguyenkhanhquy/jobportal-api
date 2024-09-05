@@ -2,7 +2,9 @@ package com.jobportal.api.exception;
 
 import com.jobportal.api.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,9 +29,9 @@ public class GlobalExceptionHandler {
 
         ErrorResponse response = new ErrorResponse();
         response.setMessage(enumException.getMessage());
-        response.setStatusCode(enumException.getErrorCode());
+        response.setStatusCode(enumException.getStatusCode().value());
 
-        return new ResponseEntity<>(response, HttpStatus.valueOf(enumException.getErrorCode()));
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,5 +42,17 @@ public class GlobalExceptionHandler {
         response.setStatusCode(HttpStatus.BAD_REQUEST.value());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AuthorizationDeniedException e) {
+        EnumException enumException = EnumException.UNAUTHORIZED;
+
+        ErrorResponse response = new ErrorResponse();
+
+        response.setMessage(enumException.getMessage());
+        response.setStatusCode(enumException.getStatusCode().value());
+
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(response.getStatusCode()));
     }
 }

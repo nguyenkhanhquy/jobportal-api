@@ -2,6 +2,7 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.CreateUserRequest;
 import com.jobportal.api.dto.request.UpdateUserRequest;
+import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
@@ -108,7 +109,10 @@ public class UserServiceImpl implements UserService {
 
         UserDTO userDTO = userMapper.mapUserToUserDTO(currentUser);
 
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
+        successResponse.setResult(userDTO);
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
 

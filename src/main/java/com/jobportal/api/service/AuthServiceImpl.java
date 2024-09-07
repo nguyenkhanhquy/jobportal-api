@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
         successResponse.setResult(userDTO);
         successResponse.setMessage("Register successfully");
         // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @Override

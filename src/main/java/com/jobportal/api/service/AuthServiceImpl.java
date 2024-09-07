@@ -2,6 +2,7 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.IntrospectRequest;
 import com.jobportal.api.dto.request.LoginRequest;
+import com.jobportal.api.dto.request.LogoutRequest;
 import com.jobportal.api.dto.request.RegisterRequest;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -9,7 +10,9 @@ import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.model.user.InvalidatedToken;
 import com.jobportal.api.model.user.User;
+import com.jobportal.api.repository.InvalidatedTokenRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.nimbusds.jose.*;
@@ -31,6 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -40,16 +44,18 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, InvalidatedTokenRepository invalidatedTokenRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.invalidatedTokenRepository = invalidatedTokenRepository;
         this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
     }
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @Override
     public ResponseEntity<?> login(LoginRequest loginRequest) {
@@ -78,18 +84,9 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<?> introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
         String token = introspectRequest.getToken();
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        try {
+            SignedJWT signedJWT = verifyToken(token);
 
-        // Phân tích token
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        // Kiểm tra tính hợp lệ của chữ ký
-        boolean verified = signedJWT.verify(verifier);
-
-        // Lấy thời gian hết hạn từ claims
-        Instant expiration = signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
-
-        if (verified && Instant.now().isBefore(expiration)) {
             // Lấy payload từ JWTClaimsSet
             Map<String, Object> payloadData = signedJWT.getJWTClaimsSet().getClaims();
 
@@ -102,13 +99,54 @@ public class AuthServiceImpl implements AuthService {
             successResponse.setResult(resultData);
 
             return new ResponseEntity<>(successResponse, HttpStatus.OK);
-        } else {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage("Invalid token");
-            errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        } catch (CustomException e) {
+            throw new CustomException(EnumException.INVALID_TOKEN);
         }
+    }
+
+    @Override
+    public ResponseEntity<?> logout(LogoutRequest logoutRequest) throws ParseException, JOSEException {
+        String token = logoutRequest.getToken();
+
+        SignedJWT signedJWT = verifyToken(token);
+
+        String jit = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        SuccessResponse<?> successResponse = new SuccessResponse<>();
+        successResponse.setMessage("Logout successfully");
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        // Phân tích token
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // Kiểm tra tính hợp lệ của chữ ký
+        boolean verified = signedJWT.verify(verifier);
+
+        // Lấy thời gian hết hạn từ claims
+        Instant expiration = signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
+
+        if (!(verified && Instant.now().isBefore(expiration))) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        return signedJWT;
     }
 
     @Override
@@ -151,7 +189,6 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
         // Mã hóa mật khẩu với Bcrypt
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(newPassword));
         User dbUser = userRepository.save(user);
 
@@ -171,7 +208,6 @@ public class AuthServiceImpl implements AuthService {
 
         // Tạo thời gian hiện tại
         Instant now = Instant.now();
-
         // Tạo thời gian hết hạn (1 giờ sau thời điểm hiện tại)
         Instant expiration = now.plus(1, ChronoUnit.HOURS);
 
@@ -181,6 +217,7 @@ public class AuthServiceImpl implements AuthService {
                 .issuer("21110282.codes")
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(expiration))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("scope", user.getRole().getName())
                 .build();
 

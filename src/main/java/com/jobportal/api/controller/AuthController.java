@@ -1,6 +1,7 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.request.IntrospectRequest;
+import com.jobportal.api.dto.request.LogoutRequest;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.request.LoginRequest;
@@ -45,6 +46,11 @@ public class AuthController {
     @PostMapping("/introspect")
     public ResponseEntity<?> introspect(@RequestBody IntrospectRequest introspectRequest) throws JOSEException, ParseException {
         return authService.introspect(introspectRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
+        return authService.logout(logoutRequest);
     }
 
     @PostMapping("/register")

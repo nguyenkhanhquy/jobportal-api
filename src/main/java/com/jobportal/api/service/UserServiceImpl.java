@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }
 
-    @PostAuthorize("returnObject.body.email == authentication.name")
+    @PostAuthorize("returnObject.body.email == authentication.name or hasAuthority('SCOPE_ADMIN')")
     @Override
     public ResponseEntity<?> getUserById(String id) {
         Optional<User> user = userRepository.findById(id);

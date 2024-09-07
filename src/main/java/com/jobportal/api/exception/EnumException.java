@@ -9,6 +9,7 @@ public enum EnumException {
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "Password must not be blank and password must be at least 8 characters"),
     // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "You are not authenticated"),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
     // 403: Forbidden — user không có quyền truy cập vào resource
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not permission"),
     // 404: Not found — không tồn tại resource

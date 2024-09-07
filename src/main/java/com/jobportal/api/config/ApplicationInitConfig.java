@@ -4,6 +4,7 @@ import com.jobportal.api.model.user.Role;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
+import com.jobportal.api.task.TokenCleanupTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -16,10 +17,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationInitConfig {
 
     private final PasswordEncoder passwordEncoder;
+    private final TokenCleanupTask tokenCleanupTask;
 
     @Autowired
-    public ApplicationInitConfig(PasswordEncoder passwordEncoder) {
+    public ApplicationInitConfig(PasswordEncoder passwordEncoder, TokenCleanupTask tokenCleanupTask) {
         this.passwordEncoder = passwordEncoder;
+        this.tokenCleanupTask = tokenCleanupTask;
     }
 
     @Bean
@@ -41,8 +44,6 @@ public class ApplicationInitConfig {
                 roleRepository.save(role);
             }
 
-            log.info("Checking if admin user exists...");
-
             if (!userRepository.existsByEmail("admin@admin.com")) {
                 User user = User.builder()
                         .email("admin@admin.com")
@@ -55,6 +56,9 @@ public class ApplicationInitConfig {
             } else {
                 log.info("Admin user already exists");
             }
+
+            log.info("Running token cleanup task on startup...");
+            tokenCleanupTask.deleteExpiredTokens();
         };
     }
 }

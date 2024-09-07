@@ -10,6 +10,7 @@ import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.model.user.User;
+import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -38,12 +39,14 @@ public class AuthServiceImpl implements AuthService {
     private String SIGNER_KEY;
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -118,8 +121,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.mapRegisterRequestToUser(registerRequest);
 
         // Mã hóa mật khẩu với Bcrypt
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+
+        // Đặt role mặc định là USER
+        user.setRole(roleRepository.findByName("USER"));
 
         // Lưu người dùng vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
@@ -176,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
                 .issuer("21110282.codes")
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(expiration))
-                .claim("scope", user.getRole())
+                .claim("scope", user.getRole().getName())
                 .build();
 
         // Chuyển đổi JWTClaimsSet thành payload

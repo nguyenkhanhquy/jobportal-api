@@ -2,6 +2,7 @@ package com.jobportal.api.config;
 
 import com.jobportal.api.model.user.Role;
 import com.jobportal.api.model.user.User;
+import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +23,31 @@ public class ApplicationInitConfig {
     }
 
     @Bean
-    public ApplicationRunner applicationRunner(UserRepository userRepository) {
+    public ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
+            if (roleRepository.findByName("ADMIN") == null) {
+                Role role = Role.builder()
+                        .name("ADMIN")
+                        .build();
+
+                roleRepository.save(role);
+            }
+
+            if (roleRepository.findByName("USER") == null) {
+                Role role = Role.builder()
+                        .name("USER")
+                        .build();
+
+                roleRepository.save(role);
+            }
+
             log.info("Checking if admin user exists...");
 
             if (!userRepository.existsByEmail("admin@admin.com")) {
                 User user = User.builder()
                         .email("admin@admin.com")
                         .password(passwordEncoder.encode("admin"))
-                        .role(Role.ADMIN)
+                        .role(roleRepository.findByName("ADMIN"))
                         .build();
 
                 userRepository.save(user);

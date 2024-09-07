@@ -1,5 +1,6 @@
 package com.jobportal.api.model.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,8 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "role")
+    @ManyToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Role role;
 }

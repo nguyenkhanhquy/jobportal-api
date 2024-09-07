@@ -3,9 +3,11 @@ package com.jobportal.api.service;
 import com.jobportal.api.dto.request.CreateUserRequest;
 import com.jobportal.api.dto.request.UpdateUserRequest;
 import com.jobportal.api.dto.user.UserDTO;
-import com.jobportal.api.model.user.Role;
+import com.jobportal.api.exception.CustomException;
+import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +27,14 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -54,7 +58,7 @@ public class UserServiceImpl implements UserService {
             UserDTO userDTO = userMapper.mapUserToUserDTO(user.get());
             return new ResponseEntity<>(userDTO, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            throw new CustomException(EnumException.USER_NOT_FOUND);
         }
     }
 
@@ -66,7 +70,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Đặt role mặc định là USER
-        user.setRole(Role.USER);
+        user.setRole(roleRepository.findByName("USER"));
 
         userRepository.save(user);
 

@@ -3,7 +3,6 @@ package com.jobportal.api.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.exception.EnumException;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
@@ -14,7 +13,7 @@ import java.io.IOException;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         EnumException enumException = EnumException.UNAUTHENTICATED;
 
         response.setStatus(enumException.getStatusCode().value());

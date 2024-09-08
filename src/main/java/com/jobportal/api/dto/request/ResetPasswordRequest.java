@@ -3,9 +3,8 @@ package com.jobportal.api.dto.request;
 import lombok.Getter;
 
 @Getter
-public class CreateUserRequest {
+public class ResetPasswordRequest {
 
-    private String fullName;
     private String email;
-    private String password;
+    private String newPassword;
 }

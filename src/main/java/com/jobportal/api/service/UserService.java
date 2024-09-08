@@ -17,6 +17,4 @@ public interface UserService {
     ResponseEntity<?> removeUserById(String id);
 
     ResponseEntity<?> getCurrentUser();
-
-    Boolean CheckEmailExists(String email);
 }

@@ -42,13 +42,17 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
+    private final OtpService otpService;
+    private final EmailService emailService;
     private final UserMapper userMapper;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, InvalidatedTokenRepository invalidatedTokenRepository, UserMapper userMapper) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
+        this.otpService = otpService;
+        this.emailService = emailService;
         this.userMapper = userMapper;
     }
 
@@ -211,19 +215,62 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> resetPassword(String email, String newPassword) {
+    public ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+        String email = forgotPasswordRequest.getEmail();
+
+        if (!userRepository.existsByEmail(email)) {
+            // 404: Not found — không tồn tại resource
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+
+        int otp = otpService.generateOtp(email);
+        emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
+
+        SuccessResponse<?> successResponse = new SuccessResponse<>();
+        successResponse.setMessage("OTP send to your email");
+        // 200 : Success
+        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+    }
+
+    @Override
+    public ResponseEntity<?> validateOtp(ValidateOtpRequest validateOtpRequest) {
+        String email = validateOtpRequest.getEmail();
+        int otp = validateOtpRequest.getOtp();
+
+        if (otpService.validateOtp(email, otp)) {
+            SuccessResponse<?> successResponse = new SuccessResponse<>();
+            successResponse.setMessage("OTP is valid. You can now reset your password");
+            // 200 : Success
+            return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+        } else {
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setMessage("Invalid OTP or OTP expired");
+            errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
+            return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        String email = resetPasswordRequest.getEmail();
+        String newPassword = resetPasswordRequest.getNewPassword();
+
         // Kiểm tra xem newPassword có hợp lệ không
         if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 8) {
             throw new CustomException(EnumException.INVALID_PASSWORD);
         }
 
+        // Tìm người dùng theo email
         User user = userRepository.findByEmail(email);
         if (user == null) {
             // 404: Not found — không tồn tại resource
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
+
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(newPassword));
+
         User dbUser = userRepository.save(user);
 
         SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();

@@ -114,10 +114,4 @@ public class UserServiceImpl implements UserService {
 
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
-
-
-    @Override
-    public Boolean CheckEmailExists(String email) {
-        return userRepository.existsByEmail(email);
-    }
 }

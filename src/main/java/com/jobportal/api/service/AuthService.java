@@ -19,7 +19,11 @@ public interface AuthService {
 
     ResponseEntity<?> register(RegisterRequest registerRequest);
 
-    ResponseEntity<?> resetPassword(String email, String newPassword);
+    ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest);
+
+    ResponseEntity<?> validateOtp(ValidateOtpRequest validateOtpRequest);
+
+    ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest);
 
     String generateToken(User user);
 }

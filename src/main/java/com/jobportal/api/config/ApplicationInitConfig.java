@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Slf4j
 @Configuration
 public class ApplicationInitConfig {
@@ -47,7 +50,10 @@ public class ApplicationInitConfig {
             if (!userRepository.existsByEmail("admin@admin.com")) {
                 User user = User.builder()
                         .email("admin@admin.com")
+                        .fullName("Admin")
                         .password(passwordEncoder.encode("admin"))
+                        .isActive(true)
+                        .registrationDate(Date.from(Instant.now()))
                         .role(roleRepository.findByName("ADMIN"))
                         .build();
 

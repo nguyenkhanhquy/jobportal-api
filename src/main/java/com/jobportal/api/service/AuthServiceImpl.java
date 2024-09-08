@@ -161,6 +161,12 @@ public class AuthServiceImpl implements AuthService {
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
+        // Đặt trạng thái kích hoạt mặc định là false
+        user.setActive(false);
+
+        // Đặt thời gian đăng ký
+        user.setRegistrationDate(Date.from(Instant.now()));
+
         // Đặt role mặc định là USER
         user.setRole(roleRepository.findByName("USER"));
 

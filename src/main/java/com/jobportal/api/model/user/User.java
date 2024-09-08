@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "user")
 @Getter
@@ -27,6 +29,12 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "is_active")
+    private boolean isActive;
+
+    @Column(name = "registration_date")
+    private Date registrationDate;
 
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")

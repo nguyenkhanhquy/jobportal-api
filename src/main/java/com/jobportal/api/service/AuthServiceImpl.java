@@ -1,9 +1,6 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.request.IntrospectRequest;
-import com.jobportal.api.dto.request.LoginRequest;
-import com.jobportal.api.dto.request.LogoutRequest;
-import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.dto.request.*;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
@@ -110,19 +107,40 @@ public class AuthServiceImpl implements AuthService {
 
         SignedJWT signedJWT = verifyToken(token);
 
-        String jit = signedJWT.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jit)
-                .expiryTime(expiryTime)
-                .build();
+        InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
 
         invalidatedTokenRepository.save(invalidatedToken);
 
         SuccessResponse<?> successResponse = new SuccessResponse<>();
         successResponse.setMessage("Logout successfully");
 
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+        String token = refreshTokenRequest.getToken();
+
+        SignedJWT signedJWT = verifyToken(token);
+
+        InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        String email = signedJWT.getJWTClaimsSet().getSubject();
+
+        // Tìm người dùng theo email
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        String newToken = generateToken(user);
+
+        SuccessResponse<Map<String, Object>> successResponse = new SuccessResponse<>();
+        successResponse.setMessage("Refresh token successfully");
+        successResponse.setResult(Map.of("token", newToken));
+        // 200 : Success
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
@@ -147,6 +165,16 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return signedJWT;
+    }
+
+    private InvalidatedToken createInvalidatedToken(SignedJWT signedJWT) throws ParseException {
+        String jit = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        return InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.request.IntrospectRequest;
-import com.jobportal.api.dto.request.LoginRequest;
-import com.jobportal.api.dto.request.LogoutRequest;
-import com.jobportal.api.dto.request.RegisterRequest;
+import com.jobportal.api.dto.request.*;
 import com.jobportal.api.model.user.User;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +14,8 @@ public interface AuthService {
     ResponseEntity<?> introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException;
 
     ResponseEntity<?> logout(LogoutRequest logoutRequest) throws ParseException, JOSEException;
+
+    ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException;
 
     ResponseEntity<?> register(RegisterRequest registerRequest);
 

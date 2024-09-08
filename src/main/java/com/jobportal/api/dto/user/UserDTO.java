@@ -20,7 +20,7 @@ public class UserDTO {
     private String fullName;
     private boolean isActive;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "SYSTEM")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date registrationDate;
 
     private Role role;

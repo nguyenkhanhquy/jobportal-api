@@ -1,11 +1,8 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.request.IntrospectRequest;
-import com.jobportal.api.dto.request.LogoutRequest;
+import com.jobportal.api.dto.request.*;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
-import com.jobportal.api.dto.request.LoginRequest;
-import com.jobportal.api.dto.request.RegisterRequest;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.service.AuthService;
@@ -51,6 +48,11 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
         return authService.logout(logoutRequest);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+        return authService.refreshToken(refreshTokenRequest);
     }
 
     @PostMapping("/register")

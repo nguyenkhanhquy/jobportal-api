@@ -45,8 +45,8 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> getAllUsers() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        log.info("Email : {}", authentication.getName());
-        log.info("Role : {}", authentication.getAuthorities());
+        log.info("getName() -> Email : {}", authentication.getName());
+        log.info("getAuthorities() -> Scope : {}", authentication.getAuthorities());
 
         return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }

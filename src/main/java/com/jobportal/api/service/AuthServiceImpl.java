@@ -215,6 +215,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public ResponseEntity<?> sendOtp(SendOtpRequest sendOtpRequest) {
+        String email = sendOtpRequest.getEmail();
+
+        if (!userRepository.existsByEmail(email)) {
+            // 404: Not found — không tồn tại resource
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+
+        int otp = otpService.generateOtp(email);
+        emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
+
+        SuccessResponse<?> successResponse = new SuccessResponse<>();
+        successResponse.setMessage("OTP send to your email");
+        // 200 : Success
+        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+    }
+
+    @Override
     public ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         String email = forgotPasswordRequest.getEmail();
 
@@ -241,13 +259,9 @@ public class AuthServiceImpl implements AuthService {
             SuccessResponse<?> successResponse = new SuccessResponse<>();
             successResponse.setMessage("OTP is valid. You can now reset your password");
             // 200 : Success
-            return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
         } else {
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage("Invalid OTP or OTP expired");
-            errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-            // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
-            return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(401));
+            throw new CustomException(EnumException.INVALID_OTP);
         }
     }
 
@@ -281,7 +295,33 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String generateToken(User user) {
+    public ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
+        String token = activateAccountRequest.getToken();
+        int otp = activateAccountRequest.getOtp();
+
+        SignedJWT signedJWT = verifyToken(token);
+
+        String email = signedJWT.getJWTClaimsSet().getSubject();
+
+        if (otpService.validateOtp(email, otp)) {
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                throw new CustomException(EnumException.USER_NOT_FOUND);
+            }
+
+            user.setActive(true);
+            userRepository.save(user);
+
+            SuccessResponse<?> successResponse = new SuccessResponse<>();
+            successResponse.setMessage("Activate account successfully");
+            // 200 : Success
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        } else {
+            throw new CustomException(EnumException.INVALID_OTP);
+        }
+    }
+
+    private String generateToken(User user) {
         // Tạo JWSHeader với "typ": "JWT" và thuật toán HS512
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS512)
                 .type(JOSEObjectType.JWT)

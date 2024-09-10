@@ -1,7 +1,6 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.*;
-import com.jobportal.api.model.user.User;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.http.ResponseEntity;
 
@@ -19,11 +18,13 @@ public interface AuthService {
 
     ResponseEntity<?> register(RegisterRequest registerRequest);
 
+    ResponseEntity<?> sendOtp(SendOtpRequest sendOtpRequest);
+
     ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest);
 
     ResponseEntity<?> validateOtp(ValidateOtpRequest validateOtpRequest);
 
     ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest);
 
-    String generateToken(User user);
+    ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException;
 }

@@ -46,6 +46,11 @@ public class AuthController {
         return authService.register(registerRequest);
     }
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> forgotPassword(@RequestBody SendOtpRequest sendOtpRequest) {
+        return authService.sendOtp(sendOtpRequest);
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         return authService.forgotPassword(forgotPasswordRequest);
@@ -64,5 +69,10 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest);
+    }
+
+    @PostMapping("/activate")
+    public ResponseEntity<?> activateAccount(@RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
+        return authService.activateAccount(activateAccountRequest);
     }
 }

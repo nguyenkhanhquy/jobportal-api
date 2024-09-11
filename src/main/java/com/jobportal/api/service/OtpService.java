@@ -2,16 +2,20 @@ package com.jobportal.api.service;
 
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.security.SecureRandom;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OtpService {
 
-    private final Map<String, Integer> otpData = new HashMap<>();
+    private final Map<String, Integer> otpData = new ConcurrentHashMap<>();
+    private final SecureRandom random = new SecureRandom();
 
     // Tạo OTP ngẫu nhiên
     public int generateOtp(String email) {
-        Random random = new Random();
         int otp = 100000 + random.nextInt(900000);
         otpData.put(email, otp);
 

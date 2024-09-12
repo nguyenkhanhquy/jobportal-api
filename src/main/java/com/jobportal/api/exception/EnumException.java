@@ -15,6 +15,7 @@ public enum EnumException {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not permission"),
     // 404: Not found — không tồn tại resource
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
+    PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "Profile not found"),
     // 409: Conflict
     USER_EXISTED(HttpStatus.CONFLICT, "User already existed"),
     // 500: Internal Server Error — có lỗi xẩy ra trong hệ thống

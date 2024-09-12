@@ -2,19 +2,22 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.user.CreateUserRequest;
 import com.jobportal.api.dto.request.user.UpdateUserRequest;
-import org.springframework.http.ResponseEntity;
+import com.jobportal.api.dto.response.SuccessResponse;
+import com.jobportal.api.dto.user.UserDTO;
+
+import java.util.List;
 
 public interface UserService {
 
-    ResponseEntity<?> getAllUsers();
+    List<UserDTO> getAllUsers();
 
-    ResponseEntity<?> getUserById(String id);
+    UserDTO getUserById(String id);
 
-    ResponseEntity<?> createUser(CreateUserRequest createUserRequest);
+    UserDTO createUser(CreateUserRequest createUserRequest);
 
-    ResponseEntity<?> updateUser(UpdateUserRequest updateUserRequest);
+    UserDTO updateUser(String id, UpdateUserRequest updateUserRequest);
 
-    ResponseEntity<?> removeUserById(String id);
+    void removeUserById(String id);
 
-    ResponseEntity<?> getProfileInfo();
+    SuccessResponse<?> getProfileInfo();
 }

@@ -1,6 +1,6 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.request.*;
+import com.jobportal.api.dto.request.auth.*;
 import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;

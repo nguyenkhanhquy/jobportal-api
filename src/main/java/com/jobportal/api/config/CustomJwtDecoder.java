@@ -1,6 +1,6 @@
 package com.jobportal.api.config;
 
-import com.jobportal.api.dto.request.IntrospectRequest;
+import com.jobportal.api.dto.request.auth.IntrospectRequest;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;

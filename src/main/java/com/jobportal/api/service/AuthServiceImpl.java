@@ -1,6 +1,6 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.request.*;
+import com.jobportal.api.dto.request.auth.*;
 import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;

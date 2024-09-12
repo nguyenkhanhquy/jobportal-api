@@ -1,6 +1,6 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.request.*;
+import com.jobportal.api.dto.request.auth.*;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.http.ResponseEntity;
 

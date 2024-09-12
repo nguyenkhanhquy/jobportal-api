@@ -1,7 +1,7 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.request.CreateUserRequest;
-import com.jobportal.api.dto.request.UpdateUserRequest;
+import com.jobportal.api.dto.request.user.CreateUserRequest;
+import com.jobportal.api.dto.request.user.UpdateUserRequest;
 import com.jobportal.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.jobportal.api.dto.request;
+package com.jobportal.api.dto.request.user;
 
 import lombok.Getter;
 

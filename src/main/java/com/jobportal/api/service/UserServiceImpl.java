@@ -1,8 +1,8 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
-import com.jobportal.api.dto.request.CreateUserRequest;
-import com.jobportal.api.dto.request.UpdateUserRequest;
+import com.jobportal.api.dto.request.user.CreateUserRequest;
+import com.jobportal.api.dto.request.user.UpdateUserRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
@@ -119,35 +119,44 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    private String getCurrentUserId() {
+    private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
-        User currentUser = userRepository.findByEmail(email);
 
-        return currentUser.getId();
+        return userRepository.findByEmail(email);
     }
 
     @Override
     public ResponseEntity<?> getProfileInfo() {
-        String id = getCurrentUserId();
+        User user = getCurrentUser();
 
-        User user = userRepository.findById(id).orElse(null);
-        JobSeekerProfile seeker = jobSeekerProfileRepository.findById(id).orElse(null);
+        if (user.getRole().getName().equals("JOB_SEEKER")) {
+            JobSeekerProfile seeker = jobSeekerProfileRepository.findById(user.getId()).orElse(null);
 
-        assert user != null;
-        assert seeker != null;
-        JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
-                .email(user.getEmail())
-                .isActive(user.isActive())
-                .fullName(seeker.getFullName())
-                .address(seeker.getAddress())
-                .workExperience(seeker.getWorkExperience())
-                .build();
+            if (seeker == null) {
+                return new ResponseEntity<>("Job Seeker Profile not found", HttpStatus.NOT_FOUND);
+            }
 
-       SuccessResponse<JobSeekerProfileDTO> successResponse = new SuccessResponse<>();
-       successResponse.setResult(seekerDTO);
+            JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
+                    .email(user.getEmail())
+                    .isActive(user.isActive())
+                    .fullName(seeker.getFullName())
+                    .address(seeker.getAddress())
+                    .workExperience(seeker.getWorkExperience())
+                    .build();
 
-       return new ResponseEntity<>(successResponse, HttpStatus.OK);
+            SuccessResponse<JobSeekerProfileDTO> successResponse = new SuccessResponse<>();
+            successResponse.setResult(seekerDTO);
+
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        } else {
+            UserDTO userDTO = userMapper.mapUserToUserDTO(user);
+
+            SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
+            successResponse.setResult(userDTO);
+
+            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        }
     }
 }

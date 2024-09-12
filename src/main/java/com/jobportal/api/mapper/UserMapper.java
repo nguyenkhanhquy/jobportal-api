@@ -1,8 +1,8 @@
 package com.jobportal.api.mapper;
 
-import com.jobportal.api.dto.request.CreateUserRequest;
-import com.jobportal.api.dto.request.RegisterRequest;
-import com.jobportal.api.dto.request.UpdateUserRequest;
+import com.jobportal.api.dto.request.user.CreateUserRequest;
+import com.jobportal.api.dto.request.auth.RegisterRequest;
+import com.jobportal.api.dto.request.user.UpdateUserRequest;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.model.user.User;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.request.CreateUserRequest;
-import com.jobportal.api.dto.request.UpdateUserRequest;
+import com.jobportal.api.dto.request.user.CreateUserRequest;
+import com.jobportal.api.dto.request.user.UpdateUserRequest;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {

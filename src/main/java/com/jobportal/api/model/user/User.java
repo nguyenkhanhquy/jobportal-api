@@ -21,9 +21,6 @@ public class User {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @Column(name = "email", unique = true)
     private String email;
 

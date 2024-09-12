@@ -7,9 +7,11 @@ import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.model.profile.JobSeekerProfile;
 import com.jobportal.api.model.user.InvalidatedToken;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.InvalidatedTokenRepository;
+import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.nimbusds.jose.*;
@@ -41,15 +43,17 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final JobSeekerProfileRepository jobSeekerProfileRepository;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
         this.otpService = otpService;
         this.emailService = emailService;
@@ -200,10 +204,15 @@ public class AuthServiceImpl implements AuthService {
         user.setRegistrationDate(Date.from(Instant.now()));
 
         // Đặt role mặc định là USER
-        user.setRole(roleRepository.findByName("USER"));
+        user.setRole(roleRepository.findByName("JOB_SEEKER"));
 
         // Lưu người dùng vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
+
+        // Lưu hồ sơ người dùng vào cơ sở dữ liệu
+        if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
+            jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, registerRequest.getFullName()));
+        }
 
         // Tạo phản hồi thành công
         SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();

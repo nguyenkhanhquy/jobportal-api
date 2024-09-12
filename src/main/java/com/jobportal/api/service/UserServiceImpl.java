@@ -1,13 +1,16 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
 import com.jobportal.api.dto.request.CreateUserRequest;
 import com.jobportal.api.dto.request.UpdateUserRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
+import com.jobportal.api.model.profile.JobSeekerProfile;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -29,13 +34,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final JobSeekerProfileRepository jobSeekerProfileRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -70,12 +77,24 @@ public class UserServiceImpl implements UserService {
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        // Đặt trạng thái kích hoạt mặc định là false
+        user.setActive(false);
+
+        // Đặt thời gian đăng ký
+        user.setRegistrationDate(Date.from(Instant.now()));
+
         // Đặt role mặc định là USER
-        user.setRole(roleRepository.findByName("USER"));
+        user.setRole(roleRepository.findByName("JOB_SEEKER"));
 
-        userRepository.save(user);
+        // Lưu người dùng vào cơ sở dữ liệu
+        User dbUser = userRepository.save(user);
 
-        UserDTO userDTO = userMapper.mapUserToUserDTO(user);
+        // Lưu hồ sơ người dùng vào cơ sở dữ liệu
+        if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
+            jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, createUserRequest.getFullName()));
+        }
+
+        UserDTO userDTO = userMapper.mapUserToUserDTO(dbUser);
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
@@ -100,18 +119,35 @@ public class UserServiceImpl implements UserService {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<?> getCurrentUser() {
+    private String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
         User currentUser = userRepository.findByEmail(email);
 
-        UserDTO userDTO = userMapper.mapUserToUserDTO(currentUser);
+        return currentUser.getId();
+    }
 
-        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
-        successResponse.setResult(userDTO);
+    @Override
+    public ResponseEntity<?> getProfileInfo() {
+        String id = getCurrentUserId();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        User user = userRepository.findById(id).orElse(null);
+        JobSeekerProfile seeker = jobSeekerProfileRepository.findById(id).orElse(null);
+
+        assert user != null;
+        assert seeker != null;
+        JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
+                .email(user.getEmail())
+                .isActive(user.isActive())
+                .fullName(seeker.getFullName())
+                .address(seeker.getAddress())
+                .workExperience(seeker.getWorkExperience())
+                .build();
+
+       SuccessResponse<JobSeekerProfileDTO> successResponse = new SuccessResponse<>();
+       successResponse.setResult(seekerDTO);
+
+       return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 }

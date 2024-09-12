@@ -16,5 +16,5 @@ public interface UserService {
 
     ResponseEntity<?> removeUserById(String id);
 
-    ResponseEntity<?> getCurrentUser();
+    ResponseEntity<?> getProfileInfo();
 }

@@ -39,9 +39,17 @@ public class ApplicationInitConfig {
                 roleRepository.save(role);
             }
 
-            if (roleRepository.findByName("USER") == null) {
+            if (roleRepository.findByName("JOB_SEEKER") == null) {
                 Role role = Role.builder()
-                        .name("USER")
+                        .name("JOB_SEEKER")
+                        .build();
+
+                roleRepository.save(role);
+            }
+
+            if (roleRepository.findByName("RECRUITER") == null) {
+                Role role = Role.builder()
+                        .name("RECRUITER")
                         .build();
 
                 roleRepository.save(role);
@@ -50,7 +58,6 @@ public class ApplicationInitConfig {
             if (!userRepository.existsByEmail("admin@admin.com")) {
                 User user = User.builder()
                         .email("admin@admin.com")
-                        .fullName("Admin")
                         .password(passwordEncoder.encode("admin"))
                         .isActive(true)
                         .registrationDate(Date.from(Instant.now()))

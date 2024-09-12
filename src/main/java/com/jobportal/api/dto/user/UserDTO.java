@@ -12,12 +12,12 @@ import java.util.Date;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserDTO {
 
     private String id;
+
     private String email;
-    private String fullName;
+
     private boolean isActive;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")

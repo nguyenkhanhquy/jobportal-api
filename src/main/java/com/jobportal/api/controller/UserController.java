@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    public ResponseEntity<?> getMyInfo() {
-        return userService.getCurrentUser();
+    public ResponseEntity<?> getProfileInfo() {
+        return userService.getProfileInfo();
     }
 }

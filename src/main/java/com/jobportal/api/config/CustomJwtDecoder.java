@@ -35,10 +35,8 @@ public class CustomJwtDecoder implements JwtDecoder {
             IntrospectRequest introspectRequest = new IntrospectRequest();
             introspectRequest.setToken(token);
             authService.introspect(introspectRequest);
-        } catch (CustomException e) {
+        } catch (CustomException | ParseException | JOSEException e) {
             throw new BadJwtException(e.getMessage());
-        } catch (ParseException | JOSEException e) {
-            throw new RuntimeException(e);
         }
 
         if (nimbusJwtDecoder == null) {

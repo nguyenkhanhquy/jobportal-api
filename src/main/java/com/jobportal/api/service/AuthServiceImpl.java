@@ -304,8 +304,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        String token = activateAccountRequest.getToken();
+    public ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest, String authorizationHeader) throws ParseException, JOSEException {
+        // Kiểm tra xem header Authorization có tồn tại hay không
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        // Lấy token từ header Authorization
+        String token = authorizationHeader.substring(7); // Loại bỏ phần "Bearer " để lấy token
+
         int otp = activateAccountRequest.getOtp();
 
         SignedJWT signedJWT = verifyToken(token);

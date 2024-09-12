@@ -26,5 +26,5 @@ public interface AuthService {
 
     ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest);
 
-    ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException;
+    ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest, String authorizationHeader) throws ParseException, JOSEException;
 }

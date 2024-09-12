@@ -1,10 +1,13 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.request.auth.*;
+import com.jobportal.api.exception.CustomException;
+import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,7 +75,8 @@ public class AuthController {
     }
 
     @PostMapping("/activate")
-    public ResponseEntity<?> activateAccount(@RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        return authService.activateAccount(activateAccountRequest);
+    public ResponseEntity<?> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
+                                             @RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
+        return authService.activateAccount(activateAccountRequest, authorizationHeader);
     }
 }

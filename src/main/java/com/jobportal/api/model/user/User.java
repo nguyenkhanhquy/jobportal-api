@@ -21,16 +21,17 @@ public class User {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "is_active")
     private boolean isActive;
 
-    @Column(name = "registration_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "registration_date", nullable = false)
     private Date registrationDate;
 
     @ManyToOne

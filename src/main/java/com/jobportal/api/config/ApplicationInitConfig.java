@@ -31,31 +31,13 @@ public class ApplicationInitConfig {
     @Bean
     public ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
-            if (roleRepository.findByName("ADMIN") == null) {
-                Role role = Role.builder()
-                        .name("ADMIN")
-                        .build();
-
-                roleRepository.save(role);
+            if (roleRepository.count() == 0) {
+                roleRepository.save(Role.builder().name("ADMIN").build());
+                roleRepository.save(Role.builder().name("JOB_SEEKER").build());
+                roleRepository.save(Role.builder().name("RECRUITER").build());
             }
 
-            if (roleRepository.findByName("JOB_SEEKER") == null) {
-                Role role = Role.builder()
-                        .name("JOB_SEEKER")
-                        .build();
-
-                roleRepository.save(role);
-            }
-
-            if (roleRepository.findByName("RECRUITER") == null) {
-                Role role = Role.builder()
-                        .name("RECRUITER")
-                        .build();
-
-                roleRepository.save(role);
-            }
-
-            if (!userRepository.existsByEmail("admin@admin.com")) {
+            if (userRepository.findByEmail("admin@admin.com") == null) {
                 User user = User.builder()
                         .email("admin@admin.com")
                         .password(passwordEncoder.encode("admin"))

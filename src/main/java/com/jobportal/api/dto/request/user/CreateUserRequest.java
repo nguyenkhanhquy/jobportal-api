@@ -1,8 +1,12 @@
 package com.jobportal.api.dto.request.user;
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CreateUserRequest {
 
     private String fullName;

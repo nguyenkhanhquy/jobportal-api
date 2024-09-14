@@ -74,6 +74,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @Override
     public UserDTO createUser(CreateUserRequest createUserRequest) {
+        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
         if (userRepository.existsByEmail(createUserRequest.getEmail())) {
             throw new CustomException(EnumException.USER_EXISTED);
         }
@@ -158,6 +159,7 @@ public class UserServiceImpl implements UserService {
             }
 
             JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
+                    .id(user.getId())
                     .email(user.getEmail())
                     .isActive(user.isActive())
                     .fullName(seeker.getFullName())

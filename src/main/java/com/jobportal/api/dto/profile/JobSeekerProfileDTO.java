@@ -9,6 +9,8 @@ import lombok.Setter;
 @Builder
 public class JobSeekerProfileDTO {
 
+    private String id;
+
     private String email;
 
     private boolean isActive;

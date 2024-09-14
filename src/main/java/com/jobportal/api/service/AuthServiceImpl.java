@@ -1,7 +1,6 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.auth.*;
-import com.jobportal.api.dto.response.ErrorResponse;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
@@ -63,30 +62,21 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @Override
-    public ResponseEntity<?> login(LoginRequest loginRequest) {
-        // Tìm người dùng theo email
+    public Map<String, Object> login(LoginRequest loginRequest) {
+        // Tìm user theo email
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
-        // Kiểm tra nếu người dùng không tồn tại hoặc mật khẩu không khớp
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             String token = generateToken(user);
 
-            SuccessResponse<Map<String, Object>> successResponse = new SuccessResponse<>();
-            successResponse.setMessage("Login successfully");
-            successResponse.setResult(Map.of("token", token));
-            // 200 : Success
-            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+            return Map.of("token", token);
+        } else {
+            throw new CustomException(EnumException.INVALID_LOGIN);
         }
-
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setMessage("Invalid email or password");
-        errorResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-        // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @Override
-    public ResponseEntity<?> introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
+    public Map<String, Object> introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
         String token = introspectRequest.getToken();
 
         try {
@@ -99,18 +89,14 @@ public class AuthServiceImpl implements AuthService {
             Map<String, Object> resultData = new HashMap<>();
             resultData.put("payload", payloadData);
 
-            SuccessResponse<Map<String, Object>> successResponse = new SuccessResponse<>();
-            successResponse.setMessage("Token is valid");
-            successResponse.setResult(resultData);
-
-            return new ResponseEntity<>(successResponse, HttpStatus.OK);
+            return resultData;
         } catch (CustomException e) {
             throw new CustomException(EnumException.INVALID_TOKEN);
         }
     }
 
     @Override
-    public ResponseEntity<?> logout(LogoutRequest logoutRequest) throws ParseException, JOSEException {
+    public void logout(LogoutRequest logoutRequest) throws ParseException, JOSEException {
         String token = logoutRequest.getToken();
 
         SignedJWT signedJWT = verifyToken(token);
@@ -118,11 +104,6 @@ public class AuthServiceImpl implements AuthService {
         InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
 
         invalidatedTokenRepository.save(invalidatedToken);
-
-        SuccessResponse<?> successResponse = new SuccessResponse<>();
-        successResponse.setMessage("Logout successfully");
-
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @Override
@@ -186,125 +167,79 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> register(RegisterRequest registerRequest) {
+    public UserDTO register(RegisterRequest registerRequest) {
         // Kiểm tra xem email đã tồn tại trong hệ thống chưa
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new CustomException(EnumException.USER_EXISTED);
         }
 
-        User user = userMapper.mapRegisterRequestToUser(registerRequest);
+        User user = User.builder()
+                .email(registerRequest.getEmail())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .isActive(false)
+                .registrationDate(Date.from(Instant.now()))
+                .role(roleRepository.findByName("JOB_SEEKER"))
+                .build();
 
-        // Mã hóa mật khẩu với Bcrypt
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-
-        // Đặt trạng thái kích hoạt mặc định là false
-        user.setActive(false);
-
-        // Đặt thời gian đăng ký
-        user.setRegistrationDate(Date.from(Instant.now()));
-
-        // Đặt role mặc định là USER
-        user.setRole(roleRepository.findByName("JOB_SEEKER"));
-
-        // Lưu người dùng vào cơ sở dữ liệu
+        // Lưu user vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
 
-        // Lưu hồ sơ người dùng vào cơ sở dữ liệu
+        // Lưu hồ sơ vào cơ sở dữ liệu
         if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
             jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, registerRequest.getFullName()));
         }
 
-        // Tạo phản hồi thành công
-        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
-        UserDTO userDTO = userMapper.mapUserToUserDTO(dbUser);
-        successResponse.setResult(userDTO);
-        successResponse.setMessage("Register successfully");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return userMapper.mapUserToUserDTO(dbUser);
     }
 
     @Override
-    public ResponseEntity<?> sendOtp(SendOtpRequest sendOtpRequest) {
+    public void sendOtp(SendOtpRequest sendOtpRequest) {
         String email = sendOtpRequest.getEmail();
 
         if (!userRepository.existsByEmail(email)) {
-            // 404: Not found — không tồn tại resource
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
 
         int otp = otpService.generateOtp(email);
         emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
-
-        SuccessResponse<?> successResponse = new SuccessResponse<>();
-        successResponse.setMessage("OTP send to your email");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
     }
 
-    @Override
-    public ResponseEntity<?> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
-        String email = forgotPasswordRequest.getEmail();
+    private void verifyOtp(String email, String otpString) {
+        try {
+            int otp = Integer.parseInt(otpString);
 
-        if (!userRepository.existsByEmail(email)) {
-            // 404: Not found — không tồn tại resource
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
-
-        int otp = otpService.generateOtp(email);
-        emailService.sendSimpleEmail(email, "Your OTP Code", "Your OTP Code is: " + otp);
-
-        SuccessResponse<?> successResponse = new SuccessResponse<>();
-        successResponse.setMessage("OTP send to your email");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
-    }
-
-    @Override
-    public ResponseEntity<?> validateOtp(ValidateOtpRequest validateOtpRequest) {
-        String email = validateOtpRequest.getEmail();
-        int otp = validateOtpRequest.getOtp();
-
-        if (otpService.validateOtp(email, otp)) {
-            SuccessResponse<?> successResponse = new SuccessResponse<>();
-            successResponse.setMessage("OTP is valid. You can now reset your password");
-            // 200 : Success
-            return new ResponseEntity<>(successResponse, HttpStatus.OK);
-        } else {
+            if (!otpService.validateOtp(email, otp)) {
+                throw new CustomException(EnumException.INVALID_OTP);
+            }
+        } catch (NumberFormatException e) {
             throw new CustomException(EnumException.INVALID_OTP);
         }
     }
 
     @Override
-    public ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+    public UserDTO resetPassword(ResetPasswordRequest resetPasswordRequest) {
         String email = resetPasswordRequest.getEmail();
         String newPassword = resetPasswordRequest.getNewPassword();
 
-        // Kiểm tra xem newPassword có hợp lệ không
-        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 8) {
-            throw new CustomException(EnumException.INVALID_PASSWORD);
-        }
+        verifyOtp(email, newPassword);
 
-        // Tìm người dùng theo email
+        // Tìm user theo email
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            // 404: Not found — không tồn tại resource
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
 
         // Mã hóa mật khẩu với Bcrypt
         user.setPassword(passwordEncoder.encode(newPassword));
 
+        // Lưu user vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
 
-        SuccessResponse<UserDTO> successResponse = new SuccessResponse<>();
-        successResponse.setResult(userMapper.mapUserToUserDTO(dbUser));
-        successResponse.setMessage("Reset password successfully");
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.valueOf(200));
+        return userMapper.mapUserToUserDTO(dbUser);
     }
 
     @Override
-    public ResponseEntity<?> activateAccount(ActivateAccountRequest activateAccountRequest, String authorizationHeader) throws ParseException, JOSEException {
+    public UserDTO activateAccount(String authorizationHeader, ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
         // Kiểm tra xem header Authorization có tồn tại hay không
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new CustomException(EnumException.UNAUTHENTICATED);
@@ -313,28 +248,24 @@ public class AuthServiceImpl implements AuthService {
         // Lấy token từ header Authorization
         String token = authorizationHeader.substring(7); // Loại bỏ phần "Bearer " để lấy token
 
-        int otp = activateAccountRequest.getOtp();
-
         SignedJWT signedJWT = verifyToken(token);
 
         String email = signedJWT.getJWTClaimsSet().getSubject();
 
-        if (otpService.validateOtp(email, otp)) {
-            User user = userRepository.findByEmail(email);
-            if (user == null) {
-                throw new CustomException(EnumException.USER_NOT_FOUND);
-            }
+        verifyOtp(email, activateAccountRequest.getOtp());
 
-            user.setActive(true);
-            userRepository.save(user);
-
-            SuccessResponse<?> successResponse = new SuccessResponse<>();
-            successResponse.setMessage("Activate account successfully");
-            // 200 : Success
-            return new ResponseEntity<>(successResponse, HttpStatus.OK);
-        } else {
-            throw new CustomException(EnumException.INVALID_OTP);
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
         }
+
+        // Kích hoạt tài khoản của user
+        user.setActive(true);
+
+        // Lưu user vào cơ sở dữ liệu
+        User dbUser = userRepository.save(user);
+
+        return userMapper.mapUserToUserDTO(dbUser);
     }
 
     private String generateToken(User user) {

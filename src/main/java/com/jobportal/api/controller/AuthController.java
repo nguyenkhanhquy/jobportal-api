@@ -1,17 +1,19 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.request.auth.*;
-import com.jobportal.api.exception.CustomException;
-import com.jobportal.api.exception.EnumException;
+import com.jobportal.api.dto.response.SuccessResponse;
+import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v0/auth")
@@ -25,18 +27,39 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest);
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> login(@Valid @RequestBody LoginRequest loginRequest) {
+
+        Map<String, Object> resultData = authService.login(loginRequest);
+
+        SuccessResponse<Map<String, Object>> successResponse = SuccessResponse.<Map<String, Object>>builder()
+                .message("Login successfully")
+                .result(resultData)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/introspect")
-    public ResponseEntity<?> introspect(@RequestBody IntrospectRequest introspectRequest) throws JOSEException, ParseException {
-        return authService.introspect(introspectRequest);
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> introspect(@RequestBody IntrospectRequest introspectRequest) throws JOSEException, ParseException {
+        Map<String, Object> resultData = authService.introspect(introspectRequest);
+
+        SuccessResponse<Map<String, Object>> successResponse = SuccessResponse.<Map<String, Object>>builder()
+                .message("Token is valid")
+                .result(resultData)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
-        return authService.logout(logoutRequest);
+    public ResponseEntity<SuccessResponse<?>> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
+        authService.logout(logoutRequest);
+
+        SuccessResponse<?> successResponse = SuccessResponse.builder()
+                .message("Logout successfully")
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
@@ -45,38 +68,50 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        return authService.register(registerRequest);
+    public ResponseEntity<SuccessResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        UserDTO userDTO = authService.register(registerRequest);
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Register successfully")
+                .result(userDTO)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<?> forgotPassword(@RequestBody SendOtpRequest sendOtpRequest) {
-        return authService.sendOtp(sendOtpRequest);
-    }
+    public ResponseEntity<SuccessResponse<?>> sendOtp(@RequestBody SendOtpRequest sendOtpRequest) {
+        authService.sendOtp(sendOtpRequest);
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        return authService.forgotPassword(forgotPasswordRequest);
-    }
+        SuccessResponse<?> successResponse = SuccessResponse.builder()
+                .message("OTP send to your email")
+                .build();
 
-    // {
-    //    "success": false,
-    //    "message": "Uncategorized Exception: Failed to convert value of type 'java.lang.String' to required type 'int'; For input string: \"\"",
-    //    "statusCode": 500
-    //}
-    @PostMapping("/validate-otp")
-    public ResponseEntity<?> validateOtp(@RequestBody ValidateOtpRequest validateOtpRequest) {
-        return authService.validateOtp(validateOtpRequest);
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-        return authService.resetPassword(resetPasswordRequest);
+    public ResponseEntity<SuccessResponse<UserDTO>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+        UserDTO userDTO = authService.resetPassword(resetPasswordRequest);
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Reset password successfully")
+                .result(userDTO)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/activate")
-    public ResponseEntity<?> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
-                                             @RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        return authService.activateAccount(activateAccountRequest, authorizationHeader);
+    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
+                                             @Valid @RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
+        UserDTO userDTO = authService.activateAccount(authorizationHeader, activateAccountRequest);
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Activate account successfully")
+                .result(userDTO)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 }

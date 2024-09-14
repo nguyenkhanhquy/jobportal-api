@@ -240,20 +240,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO activateAccount(String authorizationHeader, ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        // Kiểm tra xem header Authorization có tồn tại hay không
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
-
         // Lấy token từ header Authorization
-        String token = authorizationHeader.substring(7); // Loại bỏ phần "Bearer " để lấy token
+        String token = getTokenAuthorization(authorizationHeader);
 
+        // Kiểm tra token
         SignedJWT signedJWT = verifyToken(token);
 
+        // Lấy email từ Claims
         String email = signedJWT.getJWTClaimsSet().getSubject();
 
+        // Kiểm tra otp
         verifyOtp(email, activateAccountRequest.getOtp());
 
+        // Tìm user theo email
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new CustomException(EnumException.USER_NOT_FOUND);
@@ -268,8 +267,49 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.mapUserToUserDTO(dbUser);
     }
 
+    @Override
+    public UserDTO updatePassword(String authorizationHeader, UpdatePasswordRequest updatePasswordRequest) throws ParseException, JOSEException {
+        // Lấy token từ header Authorization
+        String token = getTokenAuthorization(authorizationHeader);
+
+        // Kiểm tra token
+        SignedJWT signedJWT = verifyToken(token);
+
+        // Lấy email từ Claims
+        String email = signedJWT.getJWTClaimsSet().getSubject();
+
+        // Tìm user theo email
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(updatePasswordRequest.getPassword(), user.getPassword())) {
+            throw new CustomException(EnumException.INVALID_PASSWORD);
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
+
+        // Lưu user vào cơ sở dữ liệu
+        User dbUser = userRepository.save(user);
+
+        return userMapper.mapUserToUserDTO(dbUser);
+    }
+
+    private String getTokenAuthorization(String authorizationHeader) {
+        // Kiểm tra xem header Authorization có tồn tại hay không
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        // Lấy token từ header Authorization
+        return authorizationHeader.substring(7); // Loại bỏ phần "Bearer " để lấy token
+    }
+
     private String generateToken(User user) {
-        // Tạo JWSHeader với "typ": "JWT" và thuật toán HS512
+        // Tạo JWSHeader với "typ": "JWT" và "alg": "HS512"
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS512)
                 .type(JOSEObjectType.JWT)
                 .build();

@@ -114,4 +114,17 @@ public class AuthController {
 
         return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
+                                                                    @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) throws ParseException, JOSEException {
+        UserDTO userDTO = authService.updatePassword(authorizationHeader, updatePasswordRequest);
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Update password successfully")
+                .result(userDTO)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+    }
 }

@@ -25,4 +25,6 @@ public interface AuthService {
     UserDTO resetPassword(ResetPasswordRequest resetPasswordRequest);
 
     UserDTO activateAccount(String authorizationHeader, ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException;
+
+    UserDTO updatePassword(String authorizationHeader, UpdatePasswordRequest updatePasswordRequest) throws ParseException, JOSEException;
 }

@@ -6,13 +6,13 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum EnumException {
     // 400 : Bad request — dữ liệu gửi lên không hợp lệ
-    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "Password must not be blank and password must be at least 8 characters"),
 
     // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "You are not authenticated"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
     INVALID_OTP(HttpStatus.UNAUTHORIZED, "Invalid OTP or OTP expired"),
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
+    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Current password is incorrect"),
 
     // 403: Forbidden — user không có quyền truy cập vào resource
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not permission"),

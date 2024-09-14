@@ -221,7 +221,7 @@ public class AuthServiceImpl implements AuthService {
         String email = resetPasswordRequest.getEmail();
         String newPassword = resetPasswordRequest.getNewPassword();
 
-        verifyOtp(email, newPassword);
+        verifyOtp(email, resetPasswordRequest.getOtp());
 
         // Tìm user theo email
         User user = userRepository.findByEmail(email);

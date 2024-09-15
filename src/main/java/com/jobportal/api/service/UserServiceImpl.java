@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
         return users.stream()
                 .map(userMapper::mapUserToUserDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @PostAuthorize("returnObject.email == authentication.name or hasAuthority('SCOPE_ADMIN')")
@@ -79,6 +78,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(EnumException.USER_EXISTED);
         }
 
+        // Tạo user mới
         User user = User.builder()
                 .email(createUserRequest.getEmail())
                 .password(passwordEncoder.encode(createUserRequest.getPassword()))
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
         } else if (user.getRole().getName().equals("RECRUITER")) {
             recruiterProfileRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Cannot delete user with ADMIN role");
+            throw new CustomException(EnumException.ADMIN_CANNOT_BE_DELETED);
         }
 
         // Xoá user khỏi cơ sở dữ liệu

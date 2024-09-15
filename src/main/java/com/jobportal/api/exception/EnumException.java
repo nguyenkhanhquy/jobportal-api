@@ -17,6 +17,7 @@ public enum EnumException {
 
     // 403: Forbidden — user không có quyền truy cập vào resource
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not permission"),
+    ADMIN_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "Cannot delete user with ADMIN role"),
 
     // 404: Not found — không tồn tại resource
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),

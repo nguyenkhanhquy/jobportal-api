@@ -25,7 +25,8 @@ public enum EnumException {
     USER_EXISTED(HttpStatus.CONFLICT, "User already existed"),
 
     // 500: Internal Server Error — có lỗi xẩy ra trong hệ thống
-    UNCATEGORIZED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Uncategorized Exception: ")
+    UNCATEGORIZED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Uncategorized Exception: "),
+    JWT_SIGNING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to sign the JWT token"),
     ;
 
     EnumException(HttpStatus statusCode, String message) {

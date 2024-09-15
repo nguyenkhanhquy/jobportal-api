@@ -18,7 +18,7 @@ import java.text.ParseException;
 public class CustomJwtDecoder implements JwtDecoder {
 
     @Value("${jwt.signerkey}")
-    private String signerKey;
+    private String jwtSignerKey;
 
     private final AuthService authService;
 
@@ -40,7 +40,7 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         if (nimbusJwtDecoder == null) {
-            SecretKey secretKey = new SecretKeySpec(signerKey.getBytes(), "HS512");
+            SecretKey secretKey = new SecretKeySpec(jwtSignerKey.getBytes(), "HS512");
             nimbusJwtDecoder = NimbusJwtDecoder
                     .withSecretKey(secretKey)
                     .macAlgorithm(MacAlgorithm.HS512)

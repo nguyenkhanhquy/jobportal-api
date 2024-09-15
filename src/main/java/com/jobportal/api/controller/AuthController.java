@@ -52,10 +52,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<SuccessResponse<?>> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
+    public ResponseEntity<SuccessResponse<Void>> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
         authService.logout(logoutRequest);
 
-        SuccessResponse<?> successResponse = SuccessResponse.builder()
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("Logout successfully")
                 .build();
 
@@ -63,8 +63,15 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
-        return authService.refreshToken(refreshTokenRequest);
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+        Map<String, Object> resultData = authService.refreshToken(refreshTokenRequest);
+
+        SuccessResponse<Map<String, Object>> successResponse = SuccessResponse.<Map<String, Object>>builder()
+                .message("Refresh token successfully")
+                .result(resultData)
+                .build();
+
+        return new ResponseEntity<>(successResponse, HttpStatus.OK);
     }
 
     @PostMapping("/register")
@@ -80,10 +87,10 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<SuccessResponse<?>> sendOtp(@RequestBody SendOtpRequest sendOtpRequest) {
+    public ResponseEntity<SuccessResponse<Void>> sendOtp(@RequestBody SendOtpRequest sendOtpRequest) {
         authService.sendOtp(sendOtpRequest);
 
-        SuccessResponse<?> successResponse = SuccessResponse.builder()
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("OTP send to your email")
                 .build();
 

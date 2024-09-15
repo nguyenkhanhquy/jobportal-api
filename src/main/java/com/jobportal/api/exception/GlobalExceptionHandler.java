@@ -9,8 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.Objects;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -37,8 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         ErrorResponse response = new ErrorResponse();
-
-        response.setMessage(Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
+        response.setMessage((e.getFieldError() != null) ? e.getFieldError().getDefaultMessage() : "Validation failed");
         response.setStatusCode(HttpStatus.BAD_REQUEST.value());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -49,7 +46,6 @@ public class GlobalExceptionHandler {
         EnumException enumException = EnumException.UNAUTHORIZED;
 
         ErrorResponse response = new ErrorResponse();
-
         response.setMessage(enumException.getMessage());
         response.setStatusCode(enumException.getStatusCode().value());
 

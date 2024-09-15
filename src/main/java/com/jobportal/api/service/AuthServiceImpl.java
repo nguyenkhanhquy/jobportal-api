@@ -1,7 +1,6 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.auth.*;
-import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
@@ -20,8 +19,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,7 +35,13 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     @Value("${jwt.signerkey}")
-    private String SIGNER_KEY;
+    private String jwtSignerKey;
+
+    @Value("${jwt.valid-duration}")
+    private int jwtValidDuration;
+
+    @Value("${jwt.refreshable-duration}")
+    private int jwtRefreshableDuration;
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -80,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
         String token = introspectRequest.getToken();
 
         try {
-            SignedJWT signedJWT = verifyToken(token);
+            SignedJWT signedJWT = verifyToken(token, false);
 
             // Lấy payload từ JWTClaimsSet
             Map<String, Object> payloadData = signedJWT.getJWTClaimsSet().getClaims();
@@ -99,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(LogoutRequest logoutRequest) throws ParseException, JOSEException {
         String token = logoutRequest.getToken();
 
-        SignedJWT signedJWT = verifyToken(token);
+        SignedJWT signedJWT = verifyToken(token, false);
 
         InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
 
@@ -107,10 +110,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<?> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+    public  Map<String, Object> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
         String token = refreshTokenRequest.getToken();
 
-        SignedJWT signedJWT = verifyToken(token);
+        SignedJWT signedJWT = verifyToken(token, true);
 
         InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
 
@@ -126,15 +129,11 @@ public class AuthServiceImpl implements AuthService {
 
         String newToken = generateToken(user);
 
-        SuccessResponse<Map<String, Object>> successResponse = new SuccessResponse<>();
-        successResponse.setMessage("Refresh token successfully");
-        successResponse.setResult(Map.of("token", newToken));
-        // 200 : Success
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return Map.of("token", newToken);
     }
 
-    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(jwtSignerKey.getBytes());
 
         // Phân tích token
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -142,8 +141,10 @@ public class AuthServiceImpl implements AuthService {
         // Kiểm tra tính hợp lệ của chữ ký
         boolean verified = signedJWT.verify(verifier);
 
-        // Lấy thời gian hết hạn từ claims
-        Instant expiration = signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
+        // Lấy thời gian hết hạn hoặc thời gian làm mới từ claims
+        Instant expiration = (isRefresh)
+                ? signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(jwtRefreshableDuration, ChronoUnit.SECONDS)
+                : signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
 
         if (!(verified && Instant.now().isBefore(expiration))) {
             throw new CustomException(EnumException.UNAUTHENTICATED);
@@ -244,7 +245,7 @@ public class AuthServiceImpl implements AuthService {
         String token = getTokenAuthorization(authorizationHeader);
 
         // Kiểm tra token
-        SignedJWT signedJWT = verifyToken(token);
+        SignedJWT signedJWT = verifyToken(token, false);
 
         // Lấy email từ Claims
         String email = signedJWT.getJWTClaimsSet().getSubject();
@@ -273,7 +274,7 @@ public class AuthServiceImpl implements AuthService {
         String token = getTokenAuthorization(authorizationHeader);
 
         // Kiểm tra token
-        SignedJWT signedJWT = verifyToken(token);
+        SignedJWT signedJWT = verifyToken(token, false);
 
         // Lấy email từ Claims
         String email = signedJWT.getJWTClaimsSet().getSubject();
@@ -314,10 +315,10 @@ public class AuthServiceImpl implements AuthService {
                 .type(JOSEObjectType.JWT)
                 .build();
 
-        // Tạo thời gian hiện tại
+        // Lấy thời gian hiện tại
         Instant now = Instant.now();
-        // Tạo thời gian hết hạn (1 giờ sau thời điểm hiện tại)
-        Instant expiration = now.plus(1, ChronoUnit.HOURS);
+        // Tạo thời gian hết hạn (thời gian hiện tại + thời hạn token)
+        Instant expiration = now.plus(jwtValidDuration, ChronoUnit.HOURS);
 
         // Tạo JWTClaimsSet chứa các thông tin cần thiết
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -329,18 +330,18 @@ public class AuthServiceImpl implements AuthService {
                 .claim("scope", user.getRole().getName())
                 .build();
 
-        // Chuyển đổi JWTClaimsSet thành payload
+        // Chuyển đổi JWTClaimsSet thành Payload
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
-        // Tạo JWSObject với header và payload
+        // Tạo JWSObject với Header và Payload
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
         try {
             // Ký JWSObject với khóa ký bí mật
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(jwtSignerKey.getBytes()));
             // Trả về JWT đã ký dưới dạng chuỗi
             return jwsObject.serialize();
         } catch (JOSEException e) {
-            throw new RuntimeException("Failed to sign the JWT token", e);
+            throw new CustomException(EnumException.JWT_SIGNING_ERROR);
         }
     }
 }

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class CustomException extends RuntimeException {
 
-    private EnumException enumException;
+    private final EnumException enumException;
 
     public CustomException(EnumException enumException) {
         super(enumException.getMessage());

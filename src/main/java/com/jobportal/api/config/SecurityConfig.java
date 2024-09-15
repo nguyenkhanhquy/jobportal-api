@@ -1,6 +1,7 @@
 package com.jobportal.api.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,15 +12,19 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users"};
+    @Value("${cors.allowed.origins}")
+    private String[] allowedOrigins;
 
-    private static final String[] ADMIN_GET_ENDPOINTS = {"/api/v0/users"};
+    private static final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users"};
 
     private final CustomJwtDecoder customJwtDecoder;
 
@@ -43,6 +48,14 @@ public class SecurityConfig {
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        httpSecurity.cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration corsConfiguration = new CorsConfiguration();
+            corsConfiguration.setAllowedOrigins(List.of(allowedOrigins));
+            corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+            corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+            return corsConfiguration;
+        }));
 
         return httpSecurity.build();
     }

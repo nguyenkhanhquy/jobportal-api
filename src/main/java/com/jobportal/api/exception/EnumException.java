@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum EnumException {
     // 400 : Bad request — dữ liệu gửi lên không hợp lệ
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
 
     // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "You are not authenticated"),

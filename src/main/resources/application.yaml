@@ -32,3 +32,7 @@ jwt:
   signerkey: ${SIGNER_KEY}
   valid-duration: ${VALID_DURATION} # in HOURS
   refreshable-duration: ${REFRESHABLE_DURATION} # in HOURS
+
+cors:
+  allowed:
+    origins: ${FRONTEND_URL}

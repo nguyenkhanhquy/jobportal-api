@@ -11,8 +11,8 @@ import lombok.*;
 @Builder
 public class SuccessResponse <T> {
 
-    private final boolean success = true;
+    private boolean success = true;
     private String message;
     private T result;
-    private final int statusCode = 200;
+    private int statusCode = 200;
 }

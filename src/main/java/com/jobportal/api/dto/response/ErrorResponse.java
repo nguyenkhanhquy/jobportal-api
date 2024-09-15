@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class ErrorResponse {
 
-    private final boolean success = false;
+    private boolean success = false;
     private String message;
     private int statusCode;
 }

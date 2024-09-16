@@ -11,8 +11,13 @@ import lombok.*;
 @Builder
 public class SuccessResponse <T> {
 
+    @Builder.Default
     private boolean success = true;
+
     private String message;
+
     private T result;
+
+    @Builder.Default
     private int statusCode = 200;
 }

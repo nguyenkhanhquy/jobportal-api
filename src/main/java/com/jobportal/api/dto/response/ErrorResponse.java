@@ -11,7 +11,10 @@ import lombok.*;
 @Builder
 public class ErrorResponse {
 
+    @Builder.Default
     private boolean success = false;
+
     private String message;
+
     private int statusCode;
 }

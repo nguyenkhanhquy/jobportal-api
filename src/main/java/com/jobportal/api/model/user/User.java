@@ -35,7 +35,7 @@ public class User {
     private Date registrationDate;
 
     @ManyToOne
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JoinColumn(name = "role_name", referencedColumnName = "name")
     @JsonManagedReference
     private Role role;
 }

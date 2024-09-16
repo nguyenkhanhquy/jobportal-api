@@ -24,7 +24,9 @@ public class SecurityConfig {
     @Value("${cors.allowed.origins}")
     private String[] allowedOrigins;
 
-    private static final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users"};
+    private static final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users", "/api/v0/jobs"};
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {"/api/v0/jobs/**"};
 
     private final CustomJwtDecoder customJwtDecoder;
 
@@ -37,6 +39,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(requests ->
                 requests.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                         .anyRequest()
                         .authenticated()
         );

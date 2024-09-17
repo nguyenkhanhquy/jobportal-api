@@ -19,6 +19,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -169,11 +170,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO register(RegisterRequest registerRequest) {
-        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new CustomException(EnumException.USER_EXISTED);
-        }
-
+        // Tạo user mới
         User user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
@@ -182,15 +179,19 @@ public class AuthServiceImpl implements AuthService {
                 .role(roleRepository.findByName("JOB_SEEKER"))
                 .build();
 
-        // Lưu user vào cơ sở dữ liệu
-        User dbUser = userRepository.save(user);
+        try {
+            // Lưu user vào cơ sở dữ liệu
+            User dbUser = userRepository.save(user);
 
-        // Lưu hồ sơ vào cơ sở dữ liệu
-        if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
-            jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, registerRequest.getFullName()));
+            // Lưu hồ sơ vào cơ sở dữ liệu
+            if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
+                jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, registerRequest.getFullName()));
+            }
+
+            return userMapper.mapUserToUserDTO(dbUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(EnumException.USER_EXISTED);
         }
-
-        return userMapper.mapUserToUserDTO(dbUser);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         EnumException enumException = EnumException.UNCATEGORIZED_EXCEPTION;
 
         ErrorResponse response = ErrorResponse.builder()
-                .message(enumException.getMessage() + e.getMessage())
+                .message(enumException.getMessage() + e.getClass().getSimpleName() + " - " + e.getMessage())
                 .statusCode(enumException.getStatusCode().value())
                 .build();
 

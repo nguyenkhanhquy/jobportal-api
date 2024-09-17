@@ -16,6 +16,7 @@ import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -73,11 +74,6 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @Override
     public UserDTO createUser(CreateUserRequest createUserRequest) {
-        // Kiểm tra xem email đã tồn tại trong hệ thống chưa
-        if (userRepository.existsByEmail(createUserRequest.getEmail())) {
-            throw new CustomException(EnumException.USER_EXISTED);
-        }
-
         // Tạo user mới
         User user = User.builder()
                 .email(createUserRequest.getEmail())
@@ -87,15 +83,19 @@ public class UserServiceImpl implements UserService {
                 .role(roleRepository.findByName("JOB_SEEKER"))
                 .build();
 
-        // Lưu user vào cơ sở dữ liệu
-        User dbUser = userRepository.save(user);
+        try {
+            // Lưu user vào cơ sở dữ liệu
+            User dbUser = userRepository.save(user);
 
-        // Lưu hồ sơ vào cơ sở dữ liệu
-        if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
-            jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, createUserRequest.getFullName()));
+            // Lưu hồ sơ vào cơ sở dữ liệu
+            if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
+                jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, createUserRequest.getFullName()));
+            }
+
+            return userMapper.mapUserToUserDTO(dbUser);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(EnumException.USER_EXISTED);
         }
-
-        return userMapper.mapUserToUserDTO(dbUser);
     }
 
     @PostAuthorize("returnObject.email == authentication.name or hasAuthority('SCOPE_ADMIN')")

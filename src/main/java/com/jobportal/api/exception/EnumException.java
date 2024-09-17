@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum EnumException {
     // 400 : Bad request — dữ liệu gửi lên không hợp lệ
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
+    USER_EXISTED(HttpStatus.BAD_REQUEST, "User already existed"),
 
     // 401 : Unauthorized — user chưa được xác thực và truy cập vào resource yêu cầu phải xác thực
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "You are not authenticated"),
@@ -22,9 +23,6 @@ public enum EnumException {
     // 404: Not found — không tồn tại resource
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "Profile not found"),
-
-    // 409: Conflict
-    USER_EXISTED(HttpStatus.CONFLICT, "User already existed"),
 
     // 500: Internal Server Error — có lỗi xẩy ra trong hệ thống
     UNCATEGORIZED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Uncategorized Exception: "),

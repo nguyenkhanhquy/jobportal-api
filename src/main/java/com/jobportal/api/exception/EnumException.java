@@ -21,6 +21,7 @@ public enum EnumException {
     ADMIN_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "Cannot delete user with ADMIN role"),
 
     // 404: Not found — không tồn tại resource
+    PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "Page not found"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "Profile not found"),
 

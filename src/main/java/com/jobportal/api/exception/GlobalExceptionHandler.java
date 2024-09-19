@@ -8,6 +8,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -18,24 +19,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         EnumException enumException = EnumException.UNCATEGORIZED_EXCEPTION;
 
-        ErrorResponse response = ErrorResponse.builder()
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(enumException.getMessage() + e.getClass().getSimpleName() + " - " + e.getMessage())
                 .statusCode(enumException.getStatusCode().value())
                 .build();
 
-        return new ResponseEntity<>(response, enumException.getStatusCode());
+        return new ResponseEntity<>(errorResponse, enumException.getStatusCode());
     }
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         EnumException enumException = e.getEnumException();
 
-        ErrorResponse response = ErrorResponse.builder()
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(enumException.getMessage())
                 .statusCode(enumException.getStatusCode().value())
                 .build();
 
-        return new ResponseEntity<>(response, enumException.getStatusCode());
+        return new ResponseEntity<>(errorResponse, enumException.getStatusCode());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -44,23 +45,35 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .toList();
 
-        ErrorResponse response = ErrorResponse.builder()
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(String.join(", ", errorMessages))
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .build();
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AuthorizationDeniedException e) {
         EnumException enumException = EnumException.UNAUTHORIZED;
 
-        ErrorResponse response = ErrorResponse.builder()
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .message(e.getMessage() + " - " + enumException.getMessage())
                 .statusCode(enumException.getStatusCode().value())
                 .build();
 
-        return new ResponseEntity<>(response, enumException.getStatusCode());
+        return new ResponseEntity<>(errorResponse, enumException.getStatusCode());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException() {
+        EnumException enumException = EnumException.PAGE_NOT_FOUND;
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(enumException.getMessage())
+                .statusCode(enumException.getStatusCode().value())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 }

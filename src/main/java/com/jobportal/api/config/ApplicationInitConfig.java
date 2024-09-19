@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -31,29 +32,38 @@ public class ApplicationInitConfig {
     @Bean
     public ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
-            if (roleRepository.count() == 0) {
-                roleRepository.save(Role.builder().name("ADMIN").build());
-                roleRepository.save(Role.builder().name("JOB_SEEKER").build());
-                roleRepository.save(Role.builder().name("RECRUITER").build());
-            }
-
-            if (userRepository.findByEmail("admin@admin.com") == null) {
-                User user = User.builder()
-                        .email("admin@admin.com")
-                        .password(passwordEncoder.encode("admin"))
-                        .isActive(true)
-                        .registrationDate(Date.from(Instant.now()))
-                        .role(roleRepository.findByName("ADMIN"))
-                        .build();
-
-                userRepository.save(user);
-                log.warn("Admin user created with email: admin@admin.com");
-            } else {
-                log.info("Admin user already exists");
-            }
-
-            log.info("Running token cleanup task on startup...");
-            tokenCleanupTask.deleteExpiredTokens();
+            initializeRoles(roleRepository);
+            initializeAdminUser(userRepository, roleRepository);
+            runTokenCleanupTask();
         };
+    }
+
+    private void initializeRoles(RoleRepository roleRepository) {
+        if (roleRepository.count() == 0) {
+            List<String> roleNames = List.of("ADMIN", "JOB_SEEKER", "RECRUITER");
+            roleNames.forEach(roleName ->
+                    roleRepository.save(Role.builder()
+                            .name(roleName)
+                            .build())
+            );
+        }
+    }
+
+    private void initializeAdminUser(UserRepository userRepository, RoleRepository roleRepository) {
+        if (userRepository.findByEmail("admin@admin.com") == null) {
+            User user = User.builder()
+                    .email("admin@admin.com")
+                    .password(passwordEncoder.encode("admin"))
+                    .isActive(true)
+                    .registrationDate(Date.from(Instant.now()))
+                    .role(roleRepository.findByName("ADMIN"))
+                    .build();
+            userRepository.save(user);
+        }
+    }
+
+    private void runTokenCleanupTask() {
+        log.info("Running token cleanup task on startup...");
+        tokenCleanupTask.deleteExpiredTokens();
     }
 }

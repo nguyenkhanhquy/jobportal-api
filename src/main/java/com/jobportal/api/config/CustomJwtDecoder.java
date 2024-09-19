@@ -20,14 +20,14 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Value("${jwt.signerkey}")
     private String jwtSignerKey;
 
+    private NimbusJwtDecoder nimbusJwtDecoder;
+
     private final AuthService authService;
 
     @Autowired
     public CustomJwtDecoder(AuthService authService) {
         this.authService = authService;
     }
-
-    private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
@@ -40,13 +40,17 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         if (nimbusJwtDecoder == null) {
-            SecretKey secretKey = new SecretKeySpec(jwtSignerKey.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder
-                    .withSecretKey(secretKey)
-                    .macAlgorithm(MacAlgorithm.HS512)
-                    .build();
+            initializeDecoder();
         }
 
         return nimbusJwtDecoder.decode(token);
+    }
+
+    private void initializeDecoder() {
+        SecretKey secretKey = new SecretKeySpec(jwtSignerKey.getBytes(), "HS512");
+        nimbusJwtDecoder = NimbusJwtDecoder
+                .withSecretKey(secretKey)
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
     }
 }

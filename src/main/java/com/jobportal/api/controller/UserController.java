@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v0/users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -75,10 +75,10 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SuccessResponse<?>> removeUserById(@PathVariable("id") String id) {
+    public ResponseEntity<SuccessResponse<Void>> removeUserById(@PathVariable("id") String id) {
         userService.removeUserById(id);
 
-        SuccessResponse<?> successResponse = SuccessResponse.builder()
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("User deleted successfully - id: " + id)
                 .build();
 

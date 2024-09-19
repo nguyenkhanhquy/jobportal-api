@@ -1,6 +1,5 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.job.JobPostActivityDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostActivityRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.model.job.JobPostActivity;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v0/jobs")
+@RequestMapping("/jobs")
 public class JobPostActivityController {
 
     private final JobPostActivityService jobPostActivityService;
@@ -25,11 +24,11 @@ public class JobPostActivityController {
 
     @GetMapping
     public ResponseEntity<SuccessResponse<List<JobPostActivity>>> getAllJobPostActivities() {
-        List<JobPostActivity> JobPostActivities = jobPostActivityService.getJobPostActivities();
+        List<JobPostActivity> jobPostActivities = jobPostActivityService.getJobPostActivities();
 
         SuccessResponse<List<JobPostActivity>> successResponse = SuccessResponse.<List<JobPostActivity>>builder()
-                .message("getAllJobPostActivities")
-                .result(JobPostActivities)
+                .message("getJobPostActivities")
+                .result(jobPostActivities)
                 .build();
 
         return new ResponseEntity<>(successResponse, HttpStatus.OK);

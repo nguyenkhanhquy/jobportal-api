@@ -1,6 +1,5 @@
 package com.jobportal.api.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,39 +21,31 @@ import java.util.List;
 public class SecurityConfig {
 
     @Value("${cors.allowed.origins}")
-    private String[] allowedOrigins;
+    private String allowedOrigins;
 
-    private static final String[] PUBLIC_POST_ENDPOINTS = {"/api/v0/auth/**", "/api/v0/users", "/api/v0/jobs"};
+    private static final String[] PUBLIC_POST_ENDPOINTS = {"/auth/**", "/jobs"};
 
-    private static final String[] PUBLIC_GET_ENDPOINTS = {"/api/v0/jobs/**"};
-
-    private final CustomJwtDecoder customJwtDecoder;
-
-    @Autowired
-    public SecurityConfig(CustomJwtDecoder customJwtDecoder) {
-        this.customJwtDecoder = customJwtDecoder;
-    }
+    private static final String[] PUBLIC_GET_ENDPOINTS = {"/jobs/**"};
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(requests ->
-                requests.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
-                        .anyRequest()
-                        .authenticated()
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, CustomJwtDecoder customJwtDecoder) throws Exception {
+        httpSecurity.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                .anyRequest()
+                .authenticated()
         );
 
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(customJwtDecoder)
-                ).authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwtConfigure -> jwtConfigure.decoder(customJwtDecoder))
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(List.of(allowedOrigins));
+            corsConfiguration.addAllowedOrigin(allowedOrigins);
             corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
             corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
             return corsConfiguration;

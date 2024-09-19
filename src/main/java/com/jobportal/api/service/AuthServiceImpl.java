@@ -20,7 +20,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,9 +50,10 @@ public class AuthServiceImpl implements AuthService {
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
@@ -61,9 +61,8 @@ public class AuthServiceImpl implements AuthService {
         this.otpService = otpService;
         this.emailService = emailService;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
-
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @Override
     public Map<String, Object> login(LoginRequest loginRequest) {

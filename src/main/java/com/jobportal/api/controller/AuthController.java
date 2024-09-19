@@ -16,7 +16,7 @@ import java.text.ParseException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v0/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private final AuthService authService;

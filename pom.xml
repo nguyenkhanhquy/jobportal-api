@@ -85,6 +85,11 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.28.5</version>
+        </dependency>
     </dependencies>
 
     <build>

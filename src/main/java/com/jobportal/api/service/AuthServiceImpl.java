@@ -12,6 +12,7 @@ import com.jobportal.api.repository.InvalidatedTokenRepository;
 import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
+import com.jobportal.api.util.AuthUtil;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -20,9 +21,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -193,18 +191,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO activateAccount(ActivateAccountRequest activateAccountRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
 
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
-
-        verifyOtp(email, activateAccountRequest.getOtp());
+        verifyOtp(user.getEmail(), activateAccountRequest.getOtp());
 
         user.setActive(true);
         User dbUser = userRepository.save(user);
@@ -214,16 +203,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO updatePassword(UpdatePasswordRequest updatePasswordRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
-
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
 
         if (!passwordEncoder.matches(updatePasswordRequest.getPassword(), user.getPassword())) {
             throw new CustomException(EnumException.INVALID_PASSWORD);

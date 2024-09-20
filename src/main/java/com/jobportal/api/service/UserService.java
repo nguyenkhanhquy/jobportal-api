@@ -19,5 +19,5 @@ public interface UserService {
 
     void removeUserById(String id);
 
-    SuccessResponse<?> getProfileInfo();
+    SuccessResponse<?> getMyInfo();
 }

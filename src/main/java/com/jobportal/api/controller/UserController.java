@@ -6,7 +6,6 @@ import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ public class UserController {
                 .result(users)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/{id}")
@@ -46,7 +45,7 @@ public class UserController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping
@@ -58,7 +57,7 @@ public class UserController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PutMapping("/{id}")
@@ -71,7 +70,7 @@ public class UserController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -82,13 +81,13 @@ public class UserController {
                 .message("User deleted successfully - id: " + id)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/my-info")
-    public ResponseEntity<SuccessResponse<?>> getProfileInfo() {
-        SuccessResponse<?> successResponse = userService.getProfileInfo();
+    public ResponseEntity<SuccessResponse<?>> getMyInfo() {
+        SuccessResponse<?> successResponse = userService.getMyInfo();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 }

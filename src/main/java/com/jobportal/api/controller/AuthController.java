@@ -7,7 +7,6 @@ import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ public class AuthController {
                 .result(resultData)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/introspect")
@@ -46,7 +45,7 @@ public class AuthController {
                 .result(resultData)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/logout")
@@ -57,7 +56,7 @@ public class AuthController {
                 .message("Logout successfully")
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/refresh")
@@ -69,7 +68,7 @@ public class AuthController {
                 .result(resultData)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/register")
@@ -81,7 +80,7 @@ public class AuthController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/send-otp")
@@ -92,7 +91,7 @@ public class AuthController {
                 .message("OTP send to your email")
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/reset-password")
@@ -104,7 +103,7 @@ public class AuthController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/activate")
@@ -116,7 +115,7 @@ public class AuthController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping("/update-password")
@@ -128,6 +127,6 @@ public class AuthController {
                 .result(userDTO)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 }

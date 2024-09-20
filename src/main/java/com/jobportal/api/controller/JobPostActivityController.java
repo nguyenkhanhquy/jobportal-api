@@ -5,7 +5,6 @@ import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.model.job.JobPostActivity;
 import com.jobportal.api.service.JobPostActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +30,7 @@ public class JobPostActivityController {
                 .result(jobPostActivities)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/{id}")
@@ -43,7 +42,7 @@ public class JobPostActivityController {
                 .result(jobPostActivity)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 
     @PostMapping
@@ -55,6 +54,6 @@ public class JobPostActivityController {
                 .result(jobPostActivity)
                 .build();
 
-        return new ResponseEntity<>(successResponse, HttpStatus.OK);
+        return ResponseEntity.ok(successResponse);
     }
 }

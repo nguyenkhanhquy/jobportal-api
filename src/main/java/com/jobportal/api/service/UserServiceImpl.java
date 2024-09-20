@@ -14,6 +14,7 @@ import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RecruiterProfileRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
+import com.jobportal.api.util.AuthUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -134,21 +135,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessResponse<?> getProfileInfo() {
-        User user = getCurrentUser();
-
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
-
-        SuccessResponse<?> successResponse;
+    public SuccessResponse<?> getMyInfo() {
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
 
         if (user.getRole().getName().equals("JOB_SEEKER")) {
-            JobSeekerProfile seeker = jobSeekerProfileRepository.findById(user.getId()).orElse(null);
-
-            if (seeker == null) {
-                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
-            }
+            JobSeekerProfile seeker = jobSeekerProfileRepository.findById(user.getId())
+                    .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
 
             JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
                     .id(user.getId())
@@ -159,25 +151,15 @@ public class UserServiceImpl implements UserService {
                     .workExperience(seeker.getWorkExperience())
                     .build();
 
-            successResponse = SuccessResponse.<JobSeekerProfileDTO>builder()
+            return SuccessResponse.builder()
                     .result(seekerDTO)
                     .build();
         } else {
             UserDTO userDTO = userMapper.mapUserToUserDTO(user);
 
-            successResponse = SuccessResponse.<UserDTO>builder()
+            return SuccessResponse.builder()
                     .result(userDTO)
                     .build();
         }
-
-        return successResponse;
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email);
     }
 }

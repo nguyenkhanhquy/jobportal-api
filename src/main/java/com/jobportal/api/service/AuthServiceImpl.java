@@ -20,6 +20,9 @@ import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +30,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,16 +68,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Map<String, Object> login(LoginRequest loginRequest) {
-        // Tìm user theo email
         User user = userRepository.findByEmail(loginRequest.getEmail());
 
-        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            String token = generateToken(user);
-
-            return Map.of("token", token);
-        } else {
+        if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new CustomException(EnumException.INVALID_LOGIN);
         }
+
+        String token = generateToken(user);
+        return Map.of("token", token);
     }
 
     @Override
@@ -88,11 +88,7 @@ public class AuthServiceImpl implements AuthService {
             // Lấy payload từ JWTClaimsSet
             Map<String, Object> payloadData = signedJWT.getJWTClaimsSet().getClaims();
 
-            // Tạo result với payload
-            Map<String, Object> resultData = new HashMap<>();
-            resultData.put("payload", payloadData);
-
-            return resultData;
+            return Map.of("payload", payloadData);
         } catch (CustomException e) {
             throw new CustomException(EnumException.INVALID_TOKEN);
         }
@@ -103,10 +99,7 @@ public class AuthServiceImpl implements AuthService {
         String token = logoutRequest.getToken();
 
         SignedJWT signedJWT = verifyToken(token, false);
-
-        InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
-
-        invalidatedTokenRepository.save(invalidatedToken);
+        invalidatedTokenRepository.save(createInvalidatedToken(signedJWT));
     }
 
     @Override
@@ -114,57 +107,16 @@ public class AuthServiceImpl implements AuthService {
         String token = refreshTokenRequest.getToken();
 
         SignedJWT signedJWT = verifyToken(token, true);
-
-        InvalidatedToken invalidatedToken = createInvalidatedToken(signedJWT);
-
-        invalidatedTokenRepository.save(invalidatedToken);
+        invalidatedTokenRepository.save(createInvalidatedToken(signedJWT));
 
         String email = signedJWT.getJWTClaimsSet().getSubject();
-
-        // Tìm người dùng theo email
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new CustomException(EnumException.UNAUTHENTICATED);
         }
 
         String newToken = generateToken(user);
-
         return Map.of("token", newToken);
-    }
-
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(jwtSignerKey.getBytes());
-
-        // Phân tích token
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        // Kiểm tra tính hợp lệ của chữ ký
-        boolean verified = signedJWT.verify(verifier);
-
-        // Lấy thời gian hết hạn hoặc thời gian làm mới từ claims
-        Instant expiration = (isRefresh)
-                ? signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(jwtRefreshableDuration, ChronoUnit.SECONDS)
-                : signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
-
-        if (!(verified && Instant.now().isBefore(expiration))) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
-
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
-
-        return signedJWT;
-    }
-
-    private InvalidatedToken createInvalidatedToken(SignedJWT signedJWT) throws ParseException {
-        String jit = signedJWT.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        return InvalidatedToken.builder()
-                .id(jit)
-                .expiryTime(expiryTime)
-                .build();
     }
 
     @Override
@@ -240,73 +192,82 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserDTO activateAccount(String authorizationHeader, ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        // Lấy token từ header Authorization
-        String token = getTokenAuthorization(authorizationHeader);
+    public UserDTO activateAccount(ActivateAccountRequest activateAccountRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
 
-        // Kiểm tra token
-        SignedJWT signedJWT = verifyToken(token, false);
-
-        // Lấy email từ Claims
-        String email = signedJWT.getJWTClaimsSet().getSubject();
-
-        // Kiểm tra otp
-        verifyOtp(email, activateAccountRequest.getOtp());
-
-        // Tìm user theo email
+        String email = authentication.getName();
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
 
-        // Kích hoạt tài khoản của user
-        user.setActive(true);
+        verifyOtp(email, activateAccountRequest.getOtp());
 
-        // Lưu user vào cơ sở dữ liệu
+        user.setActive(true);
         User dbUser = userRepository.save(user);
 
         return userMapper.mapUserToUserDTO(dbUser);
     }
 
     @Override
-    public UserDTO updatePassword(String authorizationHeader, UpdatePasswordRequest updatePasswordRequest) throws ParseException, JOSEException {
-        // Lấy token từ header Authorization
-        String token = getTokenAuthorization(authorizationHeader);
+    public UserDTO updatePassword(UpdatePasswordRequest updatePasswordRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
 
-        // Kiểm tra token
-        SignedJWT signedJWT = verifyToken(token, false);
-
-        // Lấy email từ Claims
-        String email = signedJWT.getJWTClaimsSet().getSubject();
-
-        // Tìm user theo email
+        String email = authentication.getName();
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new CustomException(EnumException.USER_NOT_FOUND);
         }
 
-        // Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(updatePasswordRequest.getPassword(), user.getPassword())) {
             throw new CustomException(EnumException.INVALID_PASSWORD);
         }
 
-        // Cập nhật mật khẩu mới
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
-
-        // Lưu user vào cơ sở dữ liệu
         User dbUser = userRepository.save(user);
 
         return userMapper.mapUserToUserDTO(dbUser);
     }
 
-    private String getTokenAuthorization(String authorizationHeader) {
-        // Kiểm tra xem header Authorization có tồn tại hay không
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(jwtSignerKey.getBytes());
+
+        // Phân tích token
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        // Kiểm tra tính hợp lệ của chữ ký
+        boolean verified = signedJWT.verify(verifier);
+
+        // Lấy thời gian hết hạn hoặc thời gian làm mới từ claims
+        Instant expiration = (isRefresh)
+                ? signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(jwtRefreshableDuration, ChronoUnit.SECONDS)
+                : signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
+
+        if (!(verified && Instant.now().isBefore(expiration))) {
             throw new CustomException(EnumException.UNAUTHENTICATED);
         }
 
-        // Lấy token từ header Authorization
-        return authorizationHeader.substring(7); // Loại bỏ phần "Bearer " để lấy token
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+            throw new CustomException(EnumException.UNAUTHENTICATED);
+        }
+
+        return signedJWT;
+    }
+
+    private InvalidatedToken createInvalidatedToken(SignedJWT signedJWT) throws ParseException {
+        String jit = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        return InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
     }
 
     private String generateToken(User user) {

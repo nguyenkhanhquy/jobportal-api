@@ -1,6 +1,5 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.job.JobPostActivityDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostActivityRequest;
 import com.jobportal.api.model.job.JobPostActivity;
 

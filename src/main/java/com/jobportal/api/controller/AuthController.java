@@ -7,7 +7,6 @@ import com.jobportal.api.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +27,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<Map<String, Object>>> login(@Valid @RequestBody LoginRequest loginRequest) {
-
         Map<String, Object> resultData = authService.login(loginRequest);
 
         SuccessResponse<Map<String, Object>> successResponse = SuccessResponse.<Map<String, Object>>builder()
@@ -110,9 +108,8 @@ public class AuthController {
     }
 
     @PostMapping("/activate")
-    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
-                                             @Valid @RequestBody ActivateAccountRequest activateAccountRequest) throws ParseException, JOSEException {
-        UserDTO userDTO = authService.activateAccount(authorizationHeader, activateAccountRequest);
+    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@Valid @RequestBody ActivateAccountRequest activateAccountRequest) {
+        UserDTO userDTO = authService.activateAccount(activateAccountRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
                 .message("Activate account successfully")
@@ -123,9 +120,8 @@ public class AuthController {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
-                                                                    @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) throws ParseException, JOSEException {
-        UserDTO userDTO = authService.updatePassword(authorizationHeader, updatePasswordRequest);
+    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        UserDTO userDTO = authService.updatePassword(updatePasswordRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
                 .message("Update password successfully")

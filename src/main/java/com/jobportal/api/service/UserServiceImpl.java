@@ -133,14 +133,6 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email);
-    }
-
     @Override
     public SuccessResponse<?> getProfileInfo() {
         User user = getCurrentUser();
@@ -179,5 +171,13 @@ public class UserServiceImpl implements UserService {
         }
 
         return successResponse;
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email);
     }
 }

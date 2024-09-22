@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum EnumException {
     // 400 : Bad request — dữ liệu gửi lên không hợp lệ
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
+    INVALID_FILE_NAME(HttpStatus.BAD_REQUEST, "Invalid file name"),
     USER_EXISTED(HttpStatus.BAD_REQUEST, "User already existed"),
 
     // 401 : Unauthorized — user chưa được xác thực
@@ -28,6 +29,7 @@ public enum EnumException {
     // 500: Internal Server Error — có lỗi trong hệ thống
     UNCATEGORIZED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "Uncategorized Exception: "),
     JWT_SIGNING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to sign the JWT token"),
+    ERROR_UPLOAD_FILE(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload file"),
     ;
 
     private final HttpStatus statusCode;

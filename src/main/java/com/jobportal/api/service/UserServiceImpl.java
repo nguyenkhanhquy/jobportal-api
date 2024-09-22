@@ -149,6 +149,7 @@ public class UserServiceImpl implements UserService {
                     .fullName(seeker.getFullName())
                     .address(seeker.getAddress())
                     .workExperience(seeker.getWorkExperience())
+                    .avatar(seeker.getAvatar())
                     .build();
 
             return SuccessResponse.builder()

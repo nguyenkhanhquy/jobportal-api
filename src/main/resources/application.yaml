@@ -32,6 +32,11 @@ spring:
           starttls:
             enable: true
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
 jwt:
   signerkey: ${SIGNER_KEY}
   valid-duration: ${VALID_DURATION} # in HOURS

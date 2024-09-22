@@ -32,6 +32,9 @@ public class JobSeekerProfile {
     @Column(name = "work_experience")
     private String workExperience;
 
+    @Column(name = "avatar")
+    private String avatar;
+
     public JobSeekerProfile(final User user, final String fullName) {
         this.user = user;
         this.fullName = fullName;

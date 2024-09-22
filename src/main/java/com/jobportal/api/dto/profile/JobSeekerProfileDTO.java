@@ -20,4 +20,6 @@ public class JobSeekerProfileDTO {
     private String address;
 
     private String workExperience;
+
+    private String avatar;
 }

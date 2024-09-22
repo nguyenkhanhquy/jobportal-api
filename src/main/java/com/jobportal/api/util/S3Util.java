@@ -16,10 +16,9 @@ import java.io.InputStream;
 
 public class S3Util {
 
-    private static final AwsCredentialsProvider credentialsProvider = createCredentialsProvider();
+    private static final AwsCredentialsProvider CREDENTIALS_PROVIDER = createCredentialsProvider();
     private static final Region AWS_REGION = Region.of(System.getenv("AWS_REGION"));
-    private static final String AWS_BUCKET = System.getenv("AWS_BUCKET");
-    public static final String AWS_URL_FOLDER = System.getenv("AWS_URL_FOLDER");
+    public static final String AWS_BUCKET = System.getenv("AWS_BUCKET");
 
     private S3Util() {
         throw new IllegalStateException("Utility class");
@@ -32,12 +31,16 @@ public class S3Util {
         return StaticCredentialsProvider.create(awsCredentials);
     }
 
+    private static S3Client createS3Client() {
+        return S3Client.builder()
+                .credentialsProvider(CREDENTIALS_PROVIDER)
+                .region(AWS_REGION)
+                .build();
+    }
+
     public static void uploadFile(String fileName, InputStream inputStream)
             throws AwsServiceException, SdkClientException, IOException {
-        try (S3Client client = S3Client.builder()
-                .credentialsProvider(credentialsProvider)
-                .region(AWS_REGION)
-                .build()) {
+        try (S3Client client = createS3Client()) {
             PutObjectRequest req = PutObjectRequest.builder()
                     .bucket(AWS_BUCKET)
                     .key(fileName)
@@ -49,10 +52,7 @@ public class S3Util {
 
     public static void deleteFile(String fileName)
             throws AwsServiceException, SdkClientException {
-        try (S3Client client = S3Client.builder()
-                .credentialsProvider(credentialsProvider)
-                .region(AWS_REGION)
-                .build()) {
+        try (S3Client client = createS3Client()) {
             DeleteObjectRequest req = DeleteObjectRequest.builder()
                     .bucket(AWS_BUCKET)
                     .key(fileName)

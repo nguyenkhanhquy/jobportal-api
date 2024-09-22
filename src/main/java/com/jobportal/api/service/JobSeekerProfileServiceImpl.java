@@ -1,5 +1,6 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.request.profile.UpdateInfoJobSeekerRequest;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.model.profile.JobSeekerProfile;
@@ -31,7 +32,7 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
     public JobSeekerProfile updateAvatar(MultipartFile multipart) {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
         JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomException(EnumException.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
 
         String fileName = multipart.getOriginalFilename();
         // Kiểm tra nếu fileName là null hoặc không có phần mở rộng
@@ -53,5 +54,18 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
         } catch (IOException e) {
             throw new CustomException(EnumException.ERROR_UPLOAD_FILE);
         }
+    }
+
+    @Override
+    public JobSeekerProfile updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
+        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
+
+        jobSeekerProfile.setFullName(updateInfoJobSeekerRequest.getFullName());
+        jobSeekerProfile.setAddress(updateInfoJobSeekerRequest.getAddress());
+        jobSeekerProfile.setWorkExperience(updateInfoJobSeekerRequest.getWorkExperience());
+
+        return jobSeekerProfileRepository.save(jobSeekerProfile);
     }
 }

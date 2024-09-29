@@ -5,6 +5,8 @@ import com.jobportal.api.mapper.JobPostActivityMapper;
 import com.jobportal.api.model.job.JobPostActivity;
 import com.jobportal.api.repository.JobPostActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,11 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     @Override
     public List<JobPostActivity> getJobPostActivities() {
         return jobPostActivityRepository.findAll();
+    }
+
+    @Override
+    public Page<JobPostActivity> getListJobPostActivities(Pageable pageable) {
+        return jobPostActivityRepository.findAll(pageable);
     }
 
     @Override

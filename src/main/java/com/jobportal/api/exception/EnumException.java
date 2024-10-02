@@ -18,7 +18,7 @@ public enum EnumException {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Current password is incorrect"),
 
     // 403: Forbidden — user không có quyền
-    UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not permission"),
+    UNAUTHORIZED(HttpStatus.FORBIDDEN, "You do not have permission"),
     ADMIN_CANNOT_BE_DELETED(HttpStatus.FORBIDDEN, "Cannot delete user with ADMIN role"),
 
     // 404: Not found — không tồn tại resource

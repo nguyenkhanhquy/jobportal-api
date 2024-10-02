@@ -39,6 +39,11 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     }
 
     @Override
+    public Page<JobPostActivity> getListJobPostActivitiesByTitle(String title, Pageable pageable) {
+        return jobPostActivityRepository.findByTitleContaining(title, pageable);
+    }
+
+    @Override
     public JobPostActivity createJobPostActivity(CreateJobPostActivityRequest createJobPostActivityRequest) {
         JobPostActivity jobPostActivity = jobPostActivityMapper.mapCreateJobPostActivityRequesttoJobPostActivity(createJobPostActivityRequest);
 

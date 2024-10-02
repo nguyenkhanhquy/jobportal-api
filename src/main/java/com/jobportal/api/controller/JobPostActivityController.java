@@ -57,6 +57,34 @@ public class JobPostActivityController {
         return ResponseEntity.ok(successResponse);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<JobPostActivity>> getListJobPostActivitiesByTitle(@RequestParam(value = "query", required = false) String query,
+                                                                                         @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                                         @RequestParam(value = "size", defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<JobPostActivity> jobPostActivities;
+        if (query == null || query.isEmpty()) {
+            jobPostActivities = jobPostActivityService.getListJobPostActivities(pageable);
+        } else {
+            jobPostActivities = jobPostActivityService.getListJobPostActivitiesByTitle(query, pageable);
+        }
+
+        PageResponse.PageInfo pageInfo = PageResponse.PageInfo.builder()
+                .pageNumber(jobPostActivities.getNumber() + 1)
+                .size(jobPostActivities.getSize())
+                .totalElements(jobPostActivities.getTotalElements())
+                .totalPages(jobPostActivities.getTotalPages())
+                .build();
+
+        PageResponse<JobPostActivity> pageResponse = PageResponse.<JobPostActivity>builder()
+                .result(jobPostActivities.getContent())
+                .page(pageInfo)
+                .build();
+
+        return ResponseEntity.ok(pageResponse);
+    }
+
     @PostMapping
     public ResponseEntity<SuccessResponse<JobPostActivity>> createJobPostActivity(@RequestBody CreateJobPostActivityRequest createJobPostActivityRequest) {
         JobPostActivity jobPostActivity = jobPostActivityService.createJobPostActivity(createJobPostActivityRequest);

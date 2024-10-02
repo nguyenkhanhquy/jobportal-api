@@ -17,5 +17,7 @@ public interface JobPostActivityService {
 
     Page<JobPostActivity> getListJobPostActivitiesByTitle(String tile, Pageable pageable);
 
+    Page<JobPostActivity> getListJobPostActivitiesByTitleAndAddress(String tile, String address, Pageable pageable);
+
     JobPostActivity createJobPostActivity(CreateJobPostActivityRequest createJobPostActivityRequest);
 }

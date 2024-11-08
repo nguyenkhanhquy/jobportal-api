@@ -1,13 +1,13 @@
 package com.jobportal.api.model.user;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import lombok.*;
 
 import java.util.List;
 
-@Entity
-@Table(name = "role")
+@Document(collection = "role")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,15 +17,11 @@ import java.util.List;
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    @DBRef  // Để tạo liên kết với các user, MongoDB sử dụng @DBRef
     @ToString.Exclude
-    @JsonBackReference
-    private List<User> users;
+    private List<User> users;  // Danh sách người dùng gắn liền với vai trò này
 }

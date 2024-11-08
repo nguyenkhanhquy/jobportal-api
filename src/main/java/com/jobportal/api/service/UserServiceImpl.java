@@ -75,23 +75,15 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @Override
     public UserDTO createUser(CreateUserRequest createUserRequest) {
-        // Tạo user mới
         User user = User.builder()
                 .email(createUserRequest.getEmail())
                 .password(passwordEncoder.encode(createUserRequest.getPassword()))
                 .isActive(false)
                 .registrationDate(Date.from(Instant.now()))
-                .role(roleRepository.findByName("JOB_SEEKER"))
                 .build();
 
         try {
-            // Lưu user vào cơ sở dữ liệu
             User dbUser = userRepository.save(user);
-
-            // Lưu hồ sơ vào cơ sở dữ liệu
-            if (dbUser.getRole().getName().equals("JOB_SEEKER")) {
-                jobSeekerProfileRepository.save(new JobSeekerProfile(dbUser, createUserRequest.getFullName()));
-            }
 
             return userMapper.mapUserToUserDTO(dbUser);
         } catch (DataIntegrityViolationException e) {

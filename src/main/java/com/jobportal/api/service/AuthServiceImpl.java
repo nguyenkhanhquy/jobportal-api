@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Lấy thời gian hết hạn hoặc thời gian làm mới từ claims
         Instant expiration = (isRefresh)
-                ? signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(jwtRefreshableDuration, ChronoUnit.SECONDS)
+                ? signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(jwtRefreshableDuration, ChronoUnit.HOURS)
                 : signedJWT.getJWTClaimsSet().getExpirationTime().toInstant();
 
         if (!(verified && Instant.now().isBefore(expiration))) {

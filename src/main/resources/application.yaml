@@ -10,15 +10,13 @@ spring:
     hibernate:
       ddl-auto: update
 
-  datasource:
-    url: ${DATASOURCE_URL}
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
-    hikari:
-      maximum-pool-size: 9
-      minimum-idle: 5
-      connection-timeout: 10000
-      idle-timeout: 300000
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
+
+  jackson:
+    time-zone: UTC
 
   mail:
     host: smtp.gmail.com

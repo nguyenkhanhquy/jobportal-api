@@ -1,15 +1,12 @@
 package com.jobportal.api.model.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.*;
 
 import java.util.Date;
 
-@Entity
-@Table(name = "invalidated_token")
+@Document(collection = "invalidated_token")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,9 +15,7 @@ import java.util.Date;
 public class InvalidatedToken {
 
     @Id
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "expiry_time")
     private Date expiryTime;
 }

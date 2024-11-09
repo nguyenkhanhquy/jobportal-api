@@ -131,8 +131,10 @@ public class UserServiceImpl implements UserService {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
 
         if (user.getRole().getName().equals("JOB_SEEKER")) {
-            JobSeekerProfile seeker = jobSeekerProfileRepository.findById(user.getId())
-                    .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
+            JobSeekerProfile seeker = jobSeekerProfileRepository.findByUser(user);
+            if (seeker == null) {
+                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+            }
 
             JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
                     .id(user.getId())

@@ -53,7 +53,7 @@ public class ApplicationInitConfig {
         if (userRepository.findByEmail("admin@admin.com") == null) {
             User user = User.builder()
                     .email("admin@admin.com")
-                    .password(passwordEncoder.encode("admin"))
+                    .password(passwordEncoder.encode("12345678"))
                     .isActive(true)
                     .registrationDate(Date.from(Instant.now()))
                     .role(roleRepository.findByName("ADMIN"))

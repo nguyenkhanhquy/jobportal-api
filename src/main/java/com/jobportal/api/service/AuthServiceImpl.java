@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public  Map<String, Object> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
+    public Map<String, Object> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException {
         String token = refreshTokenRequest.getToken();
 
         SignedJWT signedJWT = verifyToken(token, true);

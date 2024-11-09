@@ -66,27 +66,8 @@ public class JobPostActivityController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<PageResponse<JobPostActivity>> getListJobPostActivitiesByTitle(@RequestParam(value = "title", required = false) String tile,
-                                                                                         @RequestParam(value = "address", required = false) String address,
-                                                                                         @RequestParam(value = "page", defaultValue = "1") int page,
-                                                                                         @RequestParam(value = "size", defaultValue = "5") int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-
-        Page<JobPostActivity> jobPostActivities = jobPostActivityService.getListJobPostActivitiesByTitleAndAddress(tile, address, pageable);
-
-        PageResponse.PageInfo pageInfo = PageResponse.PageInfo.builder()
-                .pageNumber(jobPostActivities.getNumber() + 1)
-                .size(jobPostActivities.getSize())
-                .totalElements(jobPostActivities.getTotalElements())
-                .totalPages(jobPostActivities.getTotalPages())
-                .build();
-
-        PageResponse<JobPostActivity> pageResponse = PageResponse.<JobPostActivity>builder()
-                .result(jobPostActivities.getContent())
-                .page(pageInfo)
-                .build();
-
-        return ResponseEntity.ok(pageResponse);
+    public ResponseEntity<SuccessResponse<List<JobPostActivity>>> getListJobPostActivitiesByTitleAndAddress(@ModelAttribute JobPostSearchFilterRequest request) {
+        return ResponseEntity.ok(jobPostActivityService.getListJobPostActivitiesByTitleAndAddress(request));
     }
 
     @PostMapping

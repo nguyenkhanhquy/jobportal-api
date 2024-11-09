@@ -62,7 +62,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<SuccessResponse<UserDTO>> updateUser(@PathVariable("id") String id,
-                                              @RequestBody UpdateUserRequest updateUserRequest) {
+                                                               @RequestBody UpdateUserRequest updateUserRequest) {
         UserDTO userDTO = userService.updateUser(id, updateUserRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()

@@ -1,8 +1,8 @@
 package com.jobportal.api.model.user;
 
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.*;
 
 import java.util.Date;
 

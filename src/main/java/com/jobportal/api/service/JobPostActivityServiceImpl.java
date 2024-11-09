@@ -61,8 +61,32 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     }
 
     @Override
-    public Page<JobPostActivity> getListJobPostActivitiesByTitleAndAddress(String tile, String address, Pageable pageable) {
-        return jobPostActivityRepository.findByTitleAndAddress(tile, address, pageable);
+    public SuccessResponse<List<JobPostActivity>> getListJobPostActivitiesByTitleAndAddress(JobPostSearchFilterRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize());
+
+        Page<JobPostActivity> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank() && request.getAddress() != null && !request.getAddress().isBlank()) {
+            pageData = jobPostActivityRepository.findByTitleContainingIgnoreCaseAndAddress(request.getQuery(), request.getAddress(), pageable);
+        } else if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = jobPostActivityRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+        } else if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            pageData = jobPostActivityRepository.findByAddressContainingIgnoreCase(request.getAddress(), pageable);
+        }
+        else {
+            pageData = jobPostActivityRepository.findAll(pageable);
+        }
+
+        return SuccessResponse.<List<JobPostActivity>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent())
+                .build();
     }
 
     @Override

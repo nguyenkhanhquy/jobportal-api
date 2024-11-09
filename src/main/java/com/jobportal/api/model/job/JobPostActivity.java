@@ -1,8 +1,8 @@
 package com.jobportal.api.model.job;
 
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.*;
 
 @Document(collection = "job_post_activity")
 @Getter

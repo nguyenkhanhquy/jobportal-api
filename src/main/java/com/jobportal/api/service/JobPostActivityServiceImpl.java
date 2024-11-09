@@ -1,11 +1,14 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.job.CreateJobPostActivityRequest;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
+import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.mapper.JobPostActivityMapper;
 import com.jobportal.api.model.job.JobPostActivity;
 import com.jobportal.api.repository.JobPostActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +27,27 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     }
 
     @Override
-    public List<JobPostActivity> getJobPostActivities() {
-        return jobPostActivityRepository.findAll();
+    public SuccessResponse<List<JobPostActivity>> getJobPostActivities(JobPostSearchFilterRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize());
+
+        Page<JobPostActivity> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = jobPostActivityRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+        } else {
+            pageData = jobPostActivityRepository.findAll(pageable);
+        }
+
+        return SuccessResponse.<List<JobPostActivity>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent())
+                .build();
     }
 
     @Override
@@ -36,11 +58,6 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     @Override
     public JobPostActivity getJobPostActivityById(String id) {
         return jobPostActivityRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public Page<JobPostActivity> getListJobPostActivitiesByTitle(String title, Pageable pageable) {
-        return jobPostActivityRepository.findByTitleContaining(title, pageable);
     }
 
     @Override

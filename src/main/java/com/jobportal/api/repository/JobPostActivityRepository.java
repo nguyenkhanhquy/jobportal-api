@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.Query;
 public interface JobPostActivityRepository extends MongoRepository<JobPostActivity, String> {
 
     // Tìm kiếm theo title
-    Page<JobPostActivity> findByTitleContaining(String title, Pageable pageable);
+    Page<JobPostActivity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     // Sử dụng cú pháp @Query của MongoDB cho các điều kiện lọc
     @Query("{ $and: [ { 'title': { $regex: ?0, $options: 'i' } }, { 'address': ?1 } ] }")

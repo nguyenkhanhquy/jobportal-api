@@ -31,8 +31,10 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
     @Override
     public JobSeekerProfile updateAvatar(MultipartFile multipart) {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
-        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
+        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findByUser(user);
+        if (jobSeekerProfile == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
 
         String fileName = multipart.getOriginalFilename();
         // Kiểm tra nếu fileName là null hoặc không có phần mở rộng
@@ -59,8 +61,10 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
     @Override
     public JobSeekerProfile updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
-        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND));
+        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findByUser(user);
+        if (jobSeekerProfile == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
 
         jobSeekerProfile.setFullName(updateInfoJobSeekerRequest.getFullName());
         jobSeekerProfile.setAddress(updateInfoJobSeekerRequest.getAddress());

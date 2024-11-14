@@ -17,7 +17,7 @@ public interface AuthService {
 
     Map<String, Object> refreshToken(RefreshTokenRequest refreshTokenRequest) throws ParseException, JOSEException;
 
-    UserDTO register(RegisterRequest registerRequest);
+    UserDTO registerJobSeeker(RegisterRequest registerRequest);
 
     void sendOtp(SendOtpRequest sendOtpRequest);
 

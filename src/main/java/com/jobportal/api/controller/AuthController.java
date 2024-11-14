@@ -74,9 +74,9 @@ public class AuthController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @PostMapping("/register")
+    @PostMapping("/register/job-seeker")
     public ResponseEntity<SuccessResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        UserDTO userDTO = authService.register(registerRequest);
+        UserDTO userDTO = authService.registerJobSeeker(registerRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
                 .message("Register successfully")

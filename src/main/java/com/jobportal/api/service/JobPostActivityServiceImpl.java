@@ -51,11 +51,6 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
     }
 
     @Override
-    public Page<JobPostActivity> getListJobPostActivities(Pageable pageable) {
-        return jobPostActivityRepository.findAll(pageable);
-    }
-
-    @Override
     public JobPostActivity getJobPostActivityById(String id) {
         return jobPostActivityRepository.findById(id).orElse(null);
     }

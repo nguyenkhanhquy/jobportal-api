@@ -4,9 +4,7 @@ import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.UserRepository;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AuthUtil {
 
@@ -15,10 +13,7 @@ public class AuthUtil {
     }
 
     public static User getAuthenticatedUser(UserRepository userRepository) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            throw new CustomException(EnumException.UNAUTHENTICATED);
-        }
+        Authentication authentication = SecurityUtil.getAuthenticatedUser();
 
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);

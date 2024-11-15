@@ -1,19 +1,15 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
 import com.jobportal.api.dto.request.user.CreateUserRequest;
 import com.jobportal.api.dto.request.user.UpdateUserRequest;
-import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
-import com.jobportal.api.model.profile.JobSeekerProfile;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RecruiterProfileRepository;
 import com.jobportal.api.repository.UserRepository;
-import com.jobportal.api.util.AuthUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -121,37 +117,5 @@ public class UserServiceImpl implements UserService {
 
         // Xoá user khỏi cơ sở dữ liệu
         userRepository.deleteById(id);
-    }
-
-    @Override
-    public SuccessResponse<?> getMyInfo() {
-        User user = AuthUtil.getAuthenticatedUser(userRepository);
-
-        if (user.getRole().getName().equals("JOB_SEEKER")) {
-            JobSeekerProfile seeker = jobSeekerProfileRepository.findByUser(user);
-            if (seeker == null) {
-                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
-            }
-
-            JobSeekerProfileDTO seekerDTO = JobSeekerProfileDTO.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .isActive(user.isActive())
-                    .fullName(seeker.getFullName())
-                    .address(seeker.getAddress())
-                    .workExperience(seeker.getWorkExperience())
-                    .avatar(seeker.getAvatar())
-                    .build();
-
-            return SuccessResponse.builder()
-                    .result(seekerDTO)
-                    .build();
-        } else {
-            UserDTO userDTO = userMapper.mapUserToUserDTO(user);
-
-            return SuccessResponse.builder()
-                    .result(userDTO)
-                    .build();
-        }
     }
 }

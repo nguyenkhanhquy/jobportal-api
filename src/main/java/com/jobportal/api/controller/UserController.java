@@ -83,11 +83,4 @@ public class UserController {
 
         return ResponseEntity.ok(successResponse);
     }
-
-    @GetMapping("/my-info")
-    public ResponseEntity<SuccessResponse<?>> getMyInfo() {
-        SuccessResponse<?> successResponse = userService.getMyInfo();
-
-        return ResponseEntity.ok(successResponse);
-    }
 }

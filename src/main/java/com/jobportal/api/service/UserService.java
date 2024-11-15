@@ -2,7 +2,6 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.request.user.CreateUserRequest;
 import com.jobportal.api.dto.request.user.UpdateUserRequest;
-import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 
 import java.util.List;
@@ -18,6 +17,4 @@ public interface UserService {
     UserDTO updateUser(String id, UpdateUserRequest updateUserRequest);
 
     void removeUserById(String id);
-
-    SuccessResponse<?> getMyInfo();
 }

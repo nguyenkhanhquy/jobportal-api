@@ -71,8 +71,7 @@ public class JobPostActivityServiceImpl implements JobPostActivityService {
             pageData = jobPostActivityRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
         } else if (request.getAddress() != null && !request.getAddress().isBlank()) {
             pageData = jobPostActivityRepository.findByAddressContainingIgnoreCase(request.getAddress(), pageable);
-        }
-        else {
+        } else {
             pageData = jobPostActivityRepository.findAll(pageable);
         }
 

@@ -12,7 +12,6 @@ import com.jobportal.api.model.profile.JobSeekerProfile;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RecruiterProfileRepository;
-import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.util.AuthUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,16 +33,14 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final JobSeekerProfileRepository jobSeekerProfileRepository;
     private final RecruiterProfileRepository recruiterProfileRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, RecruiterProfileRepository recruiterProfileRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, JobSeekerProfileRepository jobSeekerProfileRepository, RecruiterProfileRepository recruiterProfileRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
         this.userMapper = userMapper;

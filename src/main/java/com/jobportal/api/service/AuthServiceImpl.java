@@ -1,5 +1,6 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
 import com.jobportal.api.dto.request.auth.*;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
@@ -13,6 +14,7 @@ import com.jobportal.api.repository.JobSeekerProfileRepository;
 import com.jobportal.api.repository.RoleRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.util.AuthUtil;
+import com.jobportal.api.util.SecurityUtil;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -20,6 +22,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -215,6 +218,42 @@ public class AuthServiceImpl implements AuthService {
         return userMapper.mapUserToUserDTO(dbUser);
     }
 
+    @Override
+    public Object getCurentAuthProfile() {
+        Authentication authentication = SecurityUtil.getAuthenticatedUser();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+
+        JobSeekerProfile seeker = jobSeekerProfileRepository.findByUser(user);
+        if (seeker == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
+
+//        Jwt jwt = (Jwt) authentication.getPrincipal();
+//        String userId = (String) jwt.getClaims().get("userId");
+
+        if (user.getRole().getName().equals("JOB_SEEKER")) {
+
+            return JobSeekerProfileDTO.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .isActive(user.isActive())
+                    .fullName(seeker.getFullName())
+                    .address(seeker.getAddress())
+                    .workExperience(seeker.getWorkExperience())
+                    .avatar(seeker.getAvatar())
+                    .build();
+//        } else if (user.getRole().getName().equals("RECRUITER")) {
+//            return recruiterMapper.mapRecruiterToRecruiterDTO(recruiterRepository.findById(userId)
+//                    .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND)));
+        } else {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
+    }
+
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(jwtSignerKey.getBytes());
 
@@ -269,6 +308,7 @@ public class AuthServiceImpl implements AuthService {
                 .expirationTime(Date.from(expiration))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", user.getRole().getName())
+                .claim("userId", user.getId())
                 .build();
 
         // Chuyển đổi JWTClaimsSet thành Payload

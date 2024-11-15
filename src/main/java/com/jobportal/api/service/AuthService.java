@@ -26,4 +26,6 @@ public interface AuthService {
     UserDTO activateAccount(ActivateAccountRequest activateAccountRequest);
 
     UserDTO updatePassword(UpdatePasswordRequest updatePasswordRequest);
+
+    Object getCurentAuthProfile();
 }

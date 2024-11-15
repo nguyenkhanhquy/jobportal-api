@@ -8,10 +8,7 @@ import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -128,6 +125,16 @@ public class AuthController {
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
                 .message("Update password successfully")
                 .result(userDTO)
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<SuccessResponse<Object>> getCurrentAuthProfile() {
+        SuccessResponse<Object> successResponse = SuccessResponse.builder()
+                .message("Get current auth profile successfully")
+                .result(authService.getCurentAuthProfile())
                 .build();
 
         return ResponseEntity.ok(successResponse);

@@ -21,7 +21,7 @@ public class JobSaved {
     private String id;
 
     @DBRef
-    private JobPostActivity jobPostActivity;
+    private JobPost jobPost;
 
     @DBRef
     private JobSeekerProfile jobSeekerProfile;

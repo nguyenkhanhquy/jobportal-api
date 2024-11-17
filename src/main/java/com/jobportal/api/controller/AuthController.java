@@ -83,6 +83,18 @@ public class AuthController {
         return ResponseEntity.ok(successResponse);
     }
 
+    @PostMapping("/register/recruiter")
+    public ResponseEntity<SuccessResponse<UserDTO>> registerRecruiter(@Valid @RequestBody RegisterRecruiterRequest registerRecruiterRequest) {
+        UserDTO userDTO = authService.registerRecruiter(registerRecruiterRequest);
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Register successfully")
+                .result(userDTO)
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
     @PostMapping("/send-otp")
     public ResponseEntity<SuccessResponse<Void>> sendOtp(@RequestBody SendOtpRequest sendOtpRequest) {
         authService.sendOtp(sendOtpRequest);

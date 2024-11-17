@@ -9,6 +9,7 @@ public enum EnumException {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request data"),
     INVALID_FILE_NAME(HttpStatus.BAD_REQUEST, "Invalid file name"),
     USER_EXISTED(HttpStatus.BAD_REQUEST, "User already existed"),
+    COMPANY_EXISTED(HttpStatus.BAD_REQUEST, "Company already existed"),
 
     // 401 : Unauthorized — user chưa được xác thực
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "You are not authenticated"),

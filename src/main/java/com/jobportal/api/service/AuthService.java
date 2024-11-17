@@ -19,6 +19,8 @@ public interface AuthService {
 
     UserDTO registerJobSeeker(RegisterRequest registerRequest);
 
+    UserDTO registerRecruiter(RegisterRecruiterRequest registerRecruiterRequest);
+
     void sendOtp(SendOtpRequest sendOtpRequest);
 
     UserDTO resetPassword(ResetPasswordRequest resetPasswordRequest);

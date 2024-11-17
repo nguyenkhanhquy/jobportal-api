@@ -6,15 +6,13 @@ import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.UserMapper;
+import com.jobportal.api.model.profile.Company;
 import com.jobportal.api.model.profile.JobSeekerProfile;
+import com.jobportal.api.model.profile.RecruiterProfile;
 import com.jobportal.api.model.user.InvalidatedToken;
 import com.jobportal.api.model.user.User;
-import com.jobportal.api.repository.InvalidatedTokenRepository;
-import com.jobportal.api.repository.JobSeekerProfileRepository;
-import com.jobportal.api.repository.RoleRepository;
-import com.jobportal.api.repository.UserRepository;
+import com.jobportal.api.repository.*;
 import com.jobportal.api.util.AuthUtil;
-import com.jobportal.api.util.SecurityUtil;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -22,7 +20,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,17 +46,21 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final JobSeekerProfileRepository jobSeekerProfileRepository;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
+    private final CompanyRepository companyRepository;
+    private final RecruiterProfileRepository recruiterRepository;
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, CompanyRepository companyRepository, RecruiterProfileRepository recruiterRepository, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
+        this.companyRepository = companyRepository;
+        this.recruiterRepository = recruiterRepository;
         this.otpService = otpService;
         this.emailService = emailService;
         this.userMapper = userMapper;
@@ -144,6 +145,43 @@ public class AuthServiceImpl implements AuthService {
 
         return userMapper.mapUserToUserDTO(dbUser);
 
+    }
+
+    @Override
+    public UserDTO registerRecruiter(RegisterRecruiterRequest registerRecruiterRequest) {
+        if (companyRepository.existsByName(registerRecruiterRequest.getCompany())) {
+            throw new CustomException(EnumException.COMPANY_EXISTED);
+        }
+
+        if (userRepository.existsByEmail(registerRecruiterRequest.getEmail())) {
+            throw new CustomException(EnumException.USER_EXISTED);
+        }
+
+        User user = User.builder()
+                .email(registerRecruiterRequest.getEmail())
+                .password(passwordEncoder.encode(registerRecruiterRequest.getPassword()))
+                .isActive(false)
+                .registrationDate(Date.from(Instant.now()))
+                .role(roleRepository.findByName("RECRUITER"))
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        Company company = Company.builder()
+                .name(registerRecruiterRequest.getCompany())
+                .build();
+
+        recruiterRepository.save(RecruiterProfile.builder()
+                .user(savedUser)
+                .company(companyRepository.save(company))
+                .name(registerRecruiterRequest.getName())
+                .position(registerRecruiterRequest.getPosition())
+                .phone(registerRecruiterRequest.getPhone())
+                .recruiterEmail(registerRecruiterRequest.getRecruiterEmail())
+                .build()
+        );
+
+        return userMapper.mapUserToUserDTO(savedUser);
     }
 
     @Override

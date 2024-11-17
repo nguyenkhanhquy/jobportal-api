@@ -29,6 +29,8 @@ public class JobPostBasicDTO {
 
     private String type;
 
+    private String salary;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date createdDate;
 

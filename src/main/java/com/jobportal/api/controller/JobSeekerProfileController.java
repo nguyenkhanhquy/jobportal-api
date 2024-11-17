@@ -33,12 +33,11 @@ public class JobSeekerProfileController {
     }
 
     @PostMapping("/update-profile")
-    public ResponseEntity<SuccessResponse<JobSeekerProfile>> updateProfile(@RequestBody UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
-        JobSeekerProfile jobSeekerProfile = jobSeekerProfileService.updateProfile(updateInfoJobSeekerRequest);
+    public ResponseEntity<SuccessResponse<Void>> updateProfile(@RequestBody UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
+        jobSeekerProfileService.updateProfile(updateInfoJobSeekerRequest);
 
-        SuccessResponse<JobSeekerProfile> successResponse = SuccessResponse.<JobSeekerProfile>builder()
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("Profile updated successfully")
-                .result(jobSeekerProfile)
                 .build();
 
         return ResponseEntity.ok(successResponse);

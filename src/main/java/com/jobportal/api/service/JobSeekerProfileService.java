@@ -8,5 +8,5 @@ public interface JobSeekerProfileService {
 
     JobSeekerProfile updateAvatar(MultipartFile multipart);
 
-    JobSeekerProfile updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest);
+    void updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest);
 }

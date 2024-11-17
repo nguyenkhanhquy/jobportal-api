@@ -59,7 +59,7 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
     }
 
     @Override
-    public JobSeekerProfile updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
+    public void updateProfile(UpdateInfoJobSeekerRequest updateInfoJobSeekerRequest) {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
         JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findByUser(user);
         if (jobSeekerProfile == null) {
@@ -70,6 +70,6 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
         jobSeekerProfile.setAddress(updateInfoJobSeekerRequest.getAddress());
         jobSeekerProfile.setWorkExperience(updateInfoJobSeekerRequest.getWorkExperience());
 
-        return jobSeekerProfileRepository.save(jobSeekerProfile);
+        jobSeekerProfileRepository.save(jobSeekerProfile);
     }
 }

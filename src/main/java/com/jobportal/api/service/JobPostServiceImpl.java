@@ -16,6 +16,10 @@ import com.jobportal.api.repository.RecruiterProfileRepository;
 import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.util.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -48,7 +52,34 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     public SuccessResponse<List<JobPostBasicDTO>> getPopularJobPosts(JobPostSearchFilterRequest request) {
-        return null;
+        Sort sort;
+        if ("oldest".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.asc("createdDate"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdDate"));
+        }
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
+
+        Page<JobPost> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+        } else {
+            pageData = jobPostRepository.findAll(pageable);
+        }
+
+        return SuccessResponse.<List<JobPostBasicDTO>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent().stream()
+                        .map(jobPostMapper::mapJobPostToJobPostBasicDTO)
+                        .toList())
+                .build();
     }
 
     @Override

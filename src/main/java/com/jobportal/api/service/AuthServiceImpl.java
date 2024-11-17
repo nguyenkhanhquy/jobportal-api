@@ -219,21 +219,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public UserDTO getCurrentAuthUser() {
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
+
+        return userMapper.mapUserToUserDTO(user);
+    }
+
+    @Override
     public Object getCurentAuthProfile() {
-        Authentication authentication = SecurityUtil.getAuthenticatedUser();
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new CustomException(EnumException.USER_NOT_FOUND);
-        }
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
 
         JobSeekerProfile seeker = jobSeekerProfileRepository.findByUser(user);
         if (seeker == null) {
             throw new CustomException(EnumException.PROFILE_NOT_FOUND);
         }
-
-//        Jwt jwt = (Jwt) authentication.getPrincipal();
-//        String userId = (String) jwt.getClaims().get("userId");
 
         if (user.getRole().getName().equals("JOB_SEEKER")) {
 

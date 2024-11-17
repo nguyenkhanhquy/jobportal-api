@@ -19,12 +19,17 @@ public class RecruiterProfile {
     @Id
     private String userId;
 
-    // Tham chiếu đến tài liệu User
     @DBRef
     private User user;
 
-    private String fullName;
-    private String address;
-    private String company;
-    private String avatar;
+    @DBRef
+    private Company company;
+
+    private String name;
+
+    private String position;
+
+    private String phone;
+
+    private String recruiterEmail;
 }

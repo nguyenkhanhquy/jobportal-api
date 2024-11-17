@@ -130,6 +130,18 @@ public class AuthController {
         return ResponseEntity.ok(successResponse);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<SuccessResponse<UserDTO>> getCurrentAuthUser() {
+        UserDTO userDTO = authService.getCurrentAuthUser();
+
+        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
+                .message("Get current auth user successfully")
+                .result(userDTO)
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<SuccessResponse<Object>> getCurrentAuthProfile() {
         SuccessResponse<Object> successResponse = SuccessResponse.builder()

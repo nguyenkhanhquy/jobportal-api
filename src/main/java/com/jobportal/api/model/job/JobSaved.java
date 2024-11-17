@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document(collection = "job_save")
+@Document(collection = "job_saved")
 @Getter
 @Setter
 @NoArgsConstructor

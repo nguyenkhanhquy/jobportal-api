@@ -192,6 +192,28 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     public boolean saveJobPost(Map<String, String> request) {
-        return false;
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
+
+        JobSeekerProfile jobSeeker = jobSeekerProfileRepository.findByUser(user);
+        if (jobSeeker == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
+
+        JobPost jobPost = jobPostRepository.findById(request.get("id"))
+                .orElseThrow(() -> new CustomException(EnumException.JOB_POST_NOT_FOUND));
+
+        JobSaved jobSaved = jobSavedRepository.findByJobSeekerProfileAndJobPost(jobSeeker, jobPost);
+        if (jobSaved != null) {
+            jobSavedRepository.delete(jobSaved);
+            return false;
+        }
+
+        jobSavedRepository.save(JobSaved.builder()
+                .savedDate(Date.from(Instant.now()))
+                .jobSeekerProfile(jobSeeker)
+                .jobPost(jobPost)
+                .build());
+
+        return true;
     }
 }

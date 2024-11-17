@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jobs")
+@RequestMapping("/jobs1")
 public class JobPostActivityController {
 
     private final JobPostActivityService jobPostActivityService;

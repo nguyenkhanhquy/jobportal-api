@@ -4,6 +4,7 @@ import com.jobportal.api.dto.business.RecruiterDTO;
 import com.jobportal.api.dto.request.profile.UpdateRecruiterProfileRequest;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface RecruiterService {
     RecruiterDTO getRecruiterById(String id);
 
     void updateRecruiterProfile(UpdateRecruiterProfileRequest request);
+
+    String uploadLogo(MultipartFile multipart);
 }

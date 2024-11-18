@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -50,6 +51,18 @@ public class RecruiterController {
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("Cập nhật hồ sơ thành công")
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @PostMapping("/upload-logo")
+    public ResponseEntity<SuccessResponse<String>> uploadLogo(@RequestParam("logo") MultipartFile multipart) {
+        String logoUrl = recruiterService.uploadLogo(multipart);
+
+        SuccessResponse<String> successResponse = SuccessResponse.<String>builder()
+                .message("Tải lên logo thành công")
+                .result(logoUrl)
                 .build();
 
         return ResponseEntity.ok(successResponse);

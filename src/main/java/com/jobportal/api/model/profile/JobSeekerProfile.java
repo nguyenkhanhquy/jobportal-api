@@ -25,6 +25,8 @@ public class JobSeekerProfile {
 
     private String fullName;
     private String address;
+    private String phone;
+    private String dob;
     private String workExperience;
     private String avatar;
 

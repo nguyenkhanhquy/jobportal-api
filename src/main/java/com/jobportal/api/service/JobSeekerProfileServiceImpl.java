@@ -67,6 +67,8 @@ public class JobSeekerProfileServiceImpl implements JobSeekerProfileService {
         }
 
         jobSeekerProfile.setFullName(updateInfoJobSeekerRequest.getFullName());
+        jobSeekerProfile.setDob(updateInfoJobSeekerRequest.getDob());
+        jobSeekerProfile.setPhone(updateInfoJobSeekerRequest.getPhone());
         jobSeekerProfile.setAddress(updateInfoJobSeekerRequest.getAddress());
         jobSeekerProfile.setWorkExperience(updateInfoJobSeekerRequest.getWorkExperience());
 

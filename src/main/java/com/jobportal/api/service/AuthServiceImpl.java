@@ -271,22 +271,12 @@ public class AuthServiceImpl implements AuthService {
     public Object getCurentAuthProfile() {
         User user = AuthUtil.getAuthenticatedUser(userRepository);
 
-        JobSeekerProfile seeker = jobSeekerProfileRepository.findByUser(user);
-        if (seeker == null) {
-            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
-        }
-
         if (user.getRole().getName().equals("JOB_SEEKER")) {
-
-            return JobSeekerProfileDTO.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .isActive(user.isActive())
-                    .fullName(seeker.getFullName())
-                    .address(seeker.getAddress())
-                    .workExperience(seeker.getWorkExperience())
-                    .avatar(seeker.getAvatar())
-                    .build();
+            JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findByUser(user);
+            if (jobSeekerProfile == null) {
+                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+            }
+            return jobSeekerProfile;
 //        } else if (user.getRole().getName().equals("RECRUITER")) {
 //            return recruiterMapper.mapRecruiterToRecruiterDTO(recruiterRepository.findById(userId)
 //                    .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND)));

@@ -54,11 +54,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AuthorizationDeniedException e) {
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException() {
         EnumException enumException = EnumException.UNAUTHORIZED;
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(e.getMessage() + " - " + enumException.getMessage())
+                .message(enumException.getMessage())
                 .statusCode(enumException.getStatusCode().value())
                 .build();
 

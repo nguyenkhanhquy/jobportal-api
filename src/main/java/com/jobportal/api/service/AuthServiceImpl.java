@@ -1,10 +1,10 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
 import com.jobportal.api.dto.request.auth.*;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
+import com.jobportal.api.mapper.RecruiterMapper;
 import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.model.profile.Company;
 import com.jobportal.api.model.profile.JobSeekerProfile;
@@ -48,19 +48,21 @@ public class AuthServiceImpl implements AuthService {
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final CompanyRepository companyRepository;
     private final RecruiterProfileRepository recruiterRepository;
+    private final RecruiterMapper recruiterMapper;
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, CompanyRepository companyRepository, RecruiterProfileRepository recruiterRepository, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, CompanyRepository companyRepository, RecruiterProfileRepository recruiterRepository, RecruiterMapper recruiterMapper, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.invalidatedTokenRepository = invalidatedTokenRepository;
         this.companyRepository = companyRepository;
         this.recruiterRepository = recruiterRepository;
+        this.recruiterMapper = recruiterMapper;
         this.otpService = otpService;
         this.emailService = emailService;
         this.userMapper = userMapper;
@@ -277,9 +279,12 @@ public class AuthServiceImpl implements AuthService {
                 throw new CustomException(EnumException.PROFILE_NOT_FOUND);
             }
             return jobSeekerProfile;
-//        } else if (user.getRole().getName().equals("RECRUITER")) {
-//            return recruiterMapper.mapRecruiterToRecruiterDTO(recruiterRepository.findById(userId)
-//                    .orElseThrow(() -> new CustomException(EnumException.PROFILE_NOT_FOUND)));
+        } else if (user.getRole().getName().equals("RECRUITER")) {
+            RecruiterProfile recruiterProfile = recruiterRepository.findByUser(user);
+            if (recruiterProfile == null) {
+                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+            }
+            return recruiterMapper.mapRecruiterToRecruiterDTO(recruiterProfile);
         } else {
             throw new CustomException(EnumException.PROFILE_NOT_FOUND);
         }

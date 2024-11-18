@@ -119,12 +119,11 @@ public class AuthController {
     }
 
     @PostMapping("/activate")
-    public ResponseEntity<SuccessResponse<UserDTO>> activateAccount(@Valid @RequestBody ActivateAccountRequest activateAccountRequest) {
-        UserDTO userDTO = authService.activateAccount(activateAccountRequest);
+    public ResponseEntity<SuccessResponse<Void>> activateAccount(@RequestBody Map<String, String> request) {
+        authService.activateAccount(request);
 
-        SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
-                .message("Activate account successfully")
-                .result(userDTO)
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
+                .message("Đăng ký tài khoản thành công")
                 .build();
 
         return ResponseEntity.ok(successResponse);

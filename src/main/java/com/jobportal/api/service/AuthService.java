@@ -25,7 +25,7 @@ public interface AuthService {
 
     UserDTO resetPassword(ResetPasswordRequest resetPasswordRequest);
 
-    UserDTO activateAccount(ActivateAccountRequest activateAccountRequest);
+    void activateAccount(Map<String, String> request);
 
     UserDTO updatePassword(UpdatePasswordRequest updatePasswordRequest);
 

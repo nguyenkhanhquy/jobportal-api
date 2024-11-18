@@ -231,15 +231,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserDTO activateAccount(ActivateAccountRequest activateAccountRequest) {
-        User user = AuthUtil.getAuthenticatedUser(userRepository);
+    public void activateAccount(Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
 
-        verifyOtp(user.getEmail(), activateAccountRequest.getOtp());
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new CustomException(EnumException.USER_NOT_FOUND);
+        }
+
+        verifyOtp(email, otp);
 
         user.setActive(true);
-        User dbUser = userRepository.save(user);
-
-        return userMapper.mapUserToUserDTO(dbUser);
+        userRepository.save(user);
     }
 
     @Override

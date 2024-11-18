@@ -29,7 +29,7 @@ public class AuthController {
         Map<String, Object> resultData = authService.login(loginRequest);
 
         SuccessResponse<Map<String, Object>> successResponse = SuccessResponse.<Map<String, Object>>builder()
-                .message("Login successfully")
+                .message("Đăng nhập thành công")
                 .result(resultData)
                 .build();
 
@@ -53,7 +53,7 @@ public class AuthController {
         authService.logout(logoutRequest);
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
-                .message("Logout successfully")
+                .message("Đăng xuất thành công")
                 .build();
 
         return ResponseEntity.ok(successResponse);
@@ -76,7 +76,7 @@ public class AuthController {
         UserDTO userDTO = authService.registerJobSeeker(registerRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
-                .message("Register successfully")
+                .message("Đăng ký tài khoản thành công")
                 .result(userDTO)
                 .build();
 
@@ -88,7 +88,7 @@ public class AuthController {
         UserDTO userDTO = authService.registerRecruiter(registerRecruiterRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
-                .message("Register successfully")
+                .message("Đăng ký tài khoản thành công")
                 .result(userDTO)
                 .build();
 
@@ -100,7 +100,7 @@ public class AuthController {
         authService.sendOtp(sendOtpRequest);
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
-                .message("OTP send to your email")
+                .message("OTP đã gửi đến email của bạn")
                 .build();
 
         return ResponseEntity.ok(successResponse);
@@ -111,7 +111,7 @@ public class AuthController {
         UserDTO userDTO = authService.resetPassword(resetPasswordRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
-                .message("Reset password successfully")
+                .message("Đặt lại mật khẩu thành công")
                 .result(userDTO)
                 .build();
 
@@ -134,7 +134,7 @@ public class AuthController {
         UserDTO userDTO = authService.updatePassword(updatePasswordRequest);
 
         SuccessResponse<UserDTO> successResponse = SuccessResponse.<UserDTO>builder()
-                .message("Update password successfully")
+                .message("Cập nhật mật khẩu thành công")
                 .result(userDTO)
                 .build();
 

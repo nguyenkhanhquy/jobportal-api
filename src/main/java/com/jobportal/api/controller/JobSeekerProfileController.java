@@ -37,7 +37,7 @@ public class JobSeekerProfileController {
         jobSeekerProfileService.updateProfile(updateInfoJobSeekerRequest);
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
-                .message("Profile updated successfully")
+                .message("Cập nhật thông tin thành công")
                 .build();
 
         return ResponseEntity.ok(successResponse);

@@ -153,7 +153,26 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     public JobPostDetailDTO getJobPostById(String id) {
-        return null;
+        JobPost jobPost = jobPostRepository.findById(id)
+                .orElseThrow(() -> new CustomException(EnumException.JOB_POST_NOT_FOUND));
+
+        JobPostDetailDTO jobPostDetailDTO = jobPostMapper.mapJobPostToJobPostDetailDTO(jobPost);
+
+        try {
+            User user = AuthUtil.getAuthenticatedUser(userRepository);
+
+            JobSeekerProfile jobSeeker = jobSeekerProfileRepository.findByUser(user);
+            if (jobSeeker == null) {
+                throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+            }
+
+            if (jobSavedRepository.existsByJobSeekerProfileAndJobPost(jobSeeker, jobPost)) {
+                jobPostDetailDTO.setSaved(true);
+            }
+            return jobPostDetailDTO;
+        } catch (CustomException e) {
+            return jobPostDetailDTO;
+        }
     }
 
     @Override

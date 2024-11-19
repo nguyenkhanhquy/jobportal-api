@@ -1,6 +1,7 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
+import com.jobportal.api.dto.job.jobsaved.JobSavedDTO;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.service.JobSavedService;
@@ -22,7 +23,7 @@ public class JobSavedController {
     }
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<JobPostBasicDTO>>> getAllSavedJobPosts(@ModelAttribute JobPostSearchFilterRequest request) {
+    public ResponseEntity<SuccessResponse<List<JobSavedDTO>>> getAllSavedJobPosts(@ModelAttribute JobPostSearchFilterRequest request) {
         return ResponseEntity.ok(jobSavedService.getAllSavedJobPosts(request));
     }
 

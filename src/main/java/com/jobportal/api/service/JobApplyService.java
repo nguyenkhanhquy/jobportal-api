@@ -2,6 +2,8 @@ package com.jobportal.api.service;
 
 import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
+import com.jobportal.api.dto.response.SuccessResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,5 +17,5 @@ public interface JobApplyService {
     String uploadCV(MultipartFile multipart);
 
     @PreAuthorize("hasAuthority('SCOPE_JOB_SEEKER')")
-    List<JobApplyDTO> getJobApplyByJobSeekerProfile();
+    SuccessResponse<List<JobApplyDTO>> getJobApplyByJobSeekerProfile(JobPostSearchFilterRequest request);
 }

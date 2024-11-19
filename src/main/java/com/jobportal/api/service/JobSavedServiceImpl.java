@@ -1,6 +1,5 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobsaved.JobSavedDTO;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -8,7 +7,6 @@ import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.JobPostMapper;
 import com.jobportal.api.mapper.JobSavedMapper;
-import com.jobportal.api.model.job.JobPost;
 import com.jobportal.api.model.job.JobSaved;
 import com.jobportal.api.model.profile.JobSeekerProfile;
 import com.jobportal.api.model.user.User;
@@ -25,8 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class JobSavedServiceImpl implements JobSavedService {

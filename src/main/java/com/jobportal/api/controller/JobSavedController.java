@@ -1,6 +1,5 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobsaved.JobSavedDTO;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;

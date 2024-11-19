@@ -2,8 +2,8 @@ package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
-import com.jobportal.api.model.job.JobApply;
 import com.jobportal.api.service.JobApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,15 +47,7 @@ public class JobApplyController {
     }
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<JobApplyDTO>>> getJobApplyByJobSeekerProfile() {
-
-        List<JobApplyDTO> jobApplyDTOs = jobApplyService.getJobApplyByJobSeekerProfile();
-
-        SuccessResponse<List<JobApplyDTO>> successResponse = SuccessResponse.<List<JobApplyDTO>>builder()
-                .message("Lấy danh sách ứng tuyển thành công")
-                .result(jobApplyDTOs)
-                .build();
-
-        return ResponseEntity.ok(successResponse);
+    public ResponseEntity<SuccessResponse<List<JobApplyDTO>>> getJobApplyByJobSeekerProfile(@ModelAttribute JobPostSearchFilterRequest request) {
+        return ResponseEntity.ok(jobApplyService.getJobApplyByJobSeekerProfile(request));
     }
 }

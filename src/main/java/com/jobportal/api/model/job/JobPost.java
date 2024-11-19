@@ -6,7 +6,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "job_post")
 @Getter
@@ -48,4 +50,6 @@ public class JobPost {
     private Company company;
 
     private String address;
+
+    private List<JobApply> jobApplies = new ArrayList<>();
 }

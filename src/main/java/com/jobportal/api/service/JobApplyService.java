@@ -1,8 +1,11 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface JobApplyService {
 
@@ -10,4 +13,7 @@ public interface JobApplyService {
     void createApplyJob(CreateApplyJobRequest request);
 
     String uploadCV(MultipartFile multipart);
+
+    @PreAuthorize("hasAuthority('SCOPE_JOB_SEEKER')")
+    List<JobApplyDTO> getJobApplyByJobSeekerProfile();
 }

@@ -1,8 +1,10 @@
 package com.jobportal.api.service;
 
+import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
+import com.jobportal.api.mapper.JobApplyMapper;
 import com.jobportal.api.model.job.JobApply;
 import com.jobportal.api.model.job.JobPost;
 import com.jobportal.api.model.profile.JobSeekerProfile;
@@ -19,6 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class JobApplyServiceImpl implements JobApplyService {
@@ -27,13 +32,15 @@ public class JobApplyServiceImpl implements JobApplyService {
     private final JobSeekerProfileRepository jobSeekerProfileRepository;
     private final JobPostRepository jobPostRepository;
     private final JobApplyRepository jobApplyRepository;
+    private final JobApplyMapper jobApplyMapper;
 
     @Autowired
-    public JobApplyServiceImpl(UserRepository userRepository, JobSeekerProfileRepository jobSeekerProfileRepository, JobPostRepository jobPostRepository, JobApplyRepository jobApplyRepository) {
+    public JobApplyServiceImpl(UserRepository userRepository, JobSeekerProfileRepository jobSeekerProfileRepository, JobPostRepository jobPostRepository, JobApplyRepository jobApplyRepository, JobApplyMapper jobApplyMapper) {
         this.userRepository = userRepository;
         this.jobSeekerProfileRepository = jobSeekerProfileRepository;
         this.jobPostRepository = jobPostRepository;
         this.jobApplyRepository = jobApplyRepository;
+        this.jobApplyMapper = jobApplyMapper;
     }
 
     @Override
@@ -53,6 +60,7 @@ public class JobApplyServiceImpl implements JobApplyService {
                 .jobSeekerProfile(jobSeeker)
                 .coverLetter(request.getCoverLetter())
                 .cv(request.getCv())
+                .applyDate(Date.from(Instant.now()))
                 .build();
 
         jobApplyRepository.save(jobApply);
@@ -88,5 +96,20 @@ public class JobApplyServiceImpl implements JobApplyService {
         } catch (IOException e) {
             throw new CustomException(EnumException.ERROR_UPLOAD_FILE);
         }
+    }
+
+    @Override
+    public List<JobApplyDTO> getJobApplyByJobSeekerProfile() {
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
+        JobSeekerProfile jobSeekerProfile = jobSeekerProfileRepository.findByUser(user);
+        if (jobSeekerProfile == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
+
+        List<JobApply> jobApplies = jobApplyRepository.findByJobSeekerProfile(jobSeekerProfile);
+
+        return jobApplies.stream()
+                .map(jobApplyMapper::mapJobApplyToJobApplyDTO)
+                .toList();
     }
 }

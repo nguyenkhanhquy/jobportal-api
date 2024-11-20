@@ -25,6 +25,9 @@ public class User {
 
     private boolean isActive;
 
+    @Builder.Default
+    private boolean isLocked = false;
+
     private Date registrationDate;
 
     @DBRef  // Để tạo liên kết với Role qua tham chiếu

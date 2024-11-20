@@ -51,5 +51,6 @@ public class JobPost {
 
     private String address;
 
+    @Builder.Default
     private List<JobApply> jobApplies = new ArrayList<>();
 }

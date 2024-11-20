@@ -18,6 +18,8 @@ public enum EnumException {
     INVALID_OTP(HttpStatus.UNAUTHORIZED, "OTP không hợp lệ"),
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Mật khẩu hiện tại không đúng"),
+    ACCOUNT_NOT_ACTIVATED(HttpStatus.UNAUTHORIZED, "Tài khoản chưa được kích hoạt"),
+    ACCOUNT_LOCKED(HttpStatus.UNAUTHORIZED, "Tài khoản đã bị khóa"),
 
     // 403: Forbidden — user không có quyền
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "Không có quyền truy cập"),

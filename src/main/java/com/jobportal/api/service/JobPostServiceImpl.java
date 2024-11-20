@@ -1,6 +1,7 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
+import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
@@ -15,7 +16,7 @@ import com.jobportal.api.model.profile.RecruiterProfile;
 import com.jobportal.api.model.user.User;
 import com.jobportal.api.repository.*;
 import com.jobportal.api.util.AuthUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JobPostServiceImpl implements JobPostService {
 
     private final JobPostRepository jobPostRepository;
@@ -38,16 +40,6 @@ public class JobPostServiceImpl implements JobPostService {
     private final UserRepository userRepository;
     private final JobSavedRepository jobSavedRepository;
     private final JobPostMapper jobPostMapper;
-
-    @Autowired
-    public JobPostServiceImpl(JobPostRepository jobPostRepository, RecruiterProfileRepository recruiterRepository, JobSeekerProfileRepository jobSeekerProfileRepository, UserRepository userRepository, JobSavedRepository jobSavedRepository, JobPostMapper jobPostMapper) {
-        this.jobPostRepository = jobPostRepository;
-        this.recruiterRepository = recruiterRepository;
-        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
-        this.userRepository = userRepository;
-        this.jobSavedRepository = jobSavedRepository;
-        this.jobPostMapper = jobPostMapper;
-    }
 
     @Override
     public SuccessResponse<List<JobPostDetailDTO>> getAllJobPosts(JobPostSearchFilterRequest request) {
@@ -234,5 +226,76 @@ public class JobPostServiceImpl implements JobPostService {
                 .build());
 
         return true;
+    }
+
+    @Override
+    public SuccessResponse<List<JobPostDTO>> getJobPostByRecruiter(JobPostSearchFilterRequest request) {
+        User user = AuthUtil.getAuthenticatedUser(userRepository);
+
+        RecruiterProfile recruiter = recruiterRepository.findByUser(user);
+        if (recruiter == null) {
+            throw new CustomException(EnumException.PROFILE_NOT_FOUND);
+        }
+
+        Sort sort;
+        if ("oldest".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.asc("createdDate"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdDate"));
+        }
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
+
+        Page<JobPost> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = jobPostRepository.findByCompanyIdAndTitleContainingIgnoreCase(recruiter.getCompany().getId(), request.getQuery(), pageable);
+        } else {
+            pageData = jobPostRepository.findByCompanyId(recruiter.getCompany().getId(), pageable);
+        }
+
+        return SuccessResponse.<List<JobPostDTO>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent().stream()
+                        .map(jobPostMapper::mapJobPostToJobPostDTO)
+                        .toList())
+                .build();
+    }
+
+    @Override
+    public SuccessResponse<List<JobPostDTO>> getJobPostByCompanyId(String id, JobPostSearchFilterRequest request) {
+        Sort sort;
+        if ("oldest".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.asc("createdDate"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdDate"));
+        }
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
+
+        Page<JobPost> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = jobPostRepository.findByCompanyIdAndTitleContainingIgnoreCase(id, request.getQuery(), pageable);
+        } else {
+            pageData = jobPostRepository.findByCompanyId(id, pageable);
+        }
+
+        return SuccessResponse.<List<JobPostDTO>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent().stream()
+                        .map(jobPostMapper::mapJobPostToJobPostDTO)
+                        .toList())
+                .build();
     }
 }

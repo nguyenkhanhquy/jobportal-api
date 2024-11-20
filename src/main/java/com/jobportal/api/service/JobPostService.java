@@ -1,6 +1,7 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
+import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
@@ -27,4 +28,8 @@ public interface JobPostService {
 
     @PreAuthorize("hasAuthority('SCOPE_JOB_SEEKER')")
     boolean saveJobPost(Map<String, String> request);
+
+    SuccessResponse<List<JobPostDTO>> getJobPostByRecruiter(JobPostSearchFilterRequest request);
+
+    SuccessResponse<List<JobPostDTO>> getJobPostByCompanyId(String id, JobPostSearchFilterRequest request);
 }

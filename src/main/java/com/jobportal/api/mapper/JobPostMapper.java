@@ -1,6 +1,7 @@
 package com.jobportal.api.mapper;
 
 import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
+import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.model.job.JobPost;
 import org.mapstruct.Mapper;
@@ -11,4 +12,6 @@ public interface JobPostMapper {
     JobPostBasicDTO mapJobPostToJobPostBasicDTO(JobPost jobPost);
 
     JobPostDetailDTO mapJobPostToJobPostDetailDTO(JobPost jobPost);
+
+    JobPostDTO mapJobPostToJobPostDTO(JobPost jobPost);
 }

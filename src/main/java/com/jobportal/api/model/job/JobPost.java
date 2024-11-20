@@ -53,4 +53,8 @@ public class JobPost {
 
     @Builder.Default
     private List<JobApply> jobApplies = new ArrayList<>();
+
+    public int getJobApplyCount() {
+        return jobApplies != null ? jobApplies.size() : 0;
+    }
 }

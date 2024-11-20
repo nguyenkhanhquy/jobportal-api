@@ -12,4 +12,8 @@ public interface JobPostRepository extends MongoRepository<JobPost, String> {
     List<JobPost> findByTitleContainingIgnoreCase(String title);
 
     Page<JobPost> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    Page<JobPost> findByCompanyIdAndTitleContainingIgnoreCase(String companyId, String title, Pageable pageable);
+
+    Page<JobPost> findByCompanyId(String companyId, Pageable pageable);
 }

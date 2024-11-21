@@ -49,6 +49,8 @@ public class JobPost {
     @DBRef
     private Company company;
 
+    private String companyName;
+
     private String address;
 
     @Builder.Default

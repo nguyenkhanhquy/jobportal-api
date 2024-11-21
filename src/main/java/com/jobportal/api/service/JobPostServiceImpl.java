@@ -56,7 +56,8 @@ public class JobPostServiceImpl implements JobPostService {
 
         Page<JobPost> pageData;
         if (request.getQuery() != null && !request.getQuery().isBlank()) {
-            pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+//            pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+            pageData = jobPostRepository.searchByKeyword(request.getQuery(), pageable);
         } else {
             pageData = jobPostRepository.findAll(pageable);
         }
@@ -193,6 +194,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .requirements(createJobPostRequest.getRequirements())
                 .benefits(createJobPostRequest.getBenefits())
                 .company(recruiter.getCompany())
+                .companyName(recruiter.getCompany().getName())
                 .address(createJobPostRequest.getAddress())
                 .build();
 

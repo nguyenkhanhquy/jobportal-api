@@ -1,6 +1,7 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
+import com.jobportal.api.dto.job.jobapply.JobApplyDetailDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -49,5 +50,14 @@ public class JobApplyController {
     @GetMapping
     public ResponseEntity<SuccessResponse<List<JobApplyDTO>>> getJobApplyByJobSeekerProfile(@ModelAttribute JobPostSearchFilterRequest request) {
         return ResponseEntity.ok(jobApplyService.getJobApplyByJobSeekerProfile(request));
+    }
+
+    @GetMapping("/post/{id}")
+    public ResponseEntity<SuccessResponse<List<JobApplyDetailDTO>>> getJobApplyById(@PathVariable String id) {
+        SuccessResponse<List<JobApplyDetailDTO>> successResponse = SuccessResponse.<List<JobApplyDetailDTO>>builder()
+                .result(jobApplyService.getALlJobApplyByJobPostId(id))
+                .build();
+
+        return ResponseEntity.ok(successResponse);
     }
 }

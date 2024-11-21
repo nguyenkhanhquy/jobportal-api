@@ -47,6 +47,8 @@ public class JobPostServiceImpl implements JobPostService {
         Sort sort;
         if ("oldest".equalsIgnoreCase(request.getOrder())) {
             sort = Sort.by(Sort.Order.asc("createdDate"));
+        } else if ("recentUpdate".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.desc("updatedDate"));
         } else {
             sort = Sort.by(Sort.Order.desc("createdDate"));
         }

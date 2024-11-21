@@ -1,6 +1,7 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
+import com.jobportal.api.dto.job.jobapply.JobApplyDetailDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -163,5 +164,15 @@ public class JobApplyServiceImpl implements JobApplyService {
                         .build())
                 .result(pageData.getContent())
                 .build();
+    }
+
+    @Override
+    public List<JobApplyDetailDTO> getALlJobApplyByJobPostId(String id) {
+        JobPost jobPost = jobPostRepository.findById(id)
+                .orElseThrow(() -> new CustomException(EnumException.JOB_POST_NOT_FOUND));
+
+        return jobPost.getJobApplies().stream()
+                .map(jobApplyMapper::toDetailDTO)
+                .toList();
     }
 }

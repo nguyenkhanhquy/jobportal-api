@@ -1,6 +1,7 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.job.jobapply.JobApplyDTO;
+import com.jobportal.api.dto.job.jobapply.JobApplyDetailDTO;
 import com.jobportal.api.dto.request.job.CreateApplyJobRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -18,4 +19,6 @@ public interface JobApplyService {
 
     @PreAuthorize("hasAuthority('SCOPE_JOB_SEEKER')")
     SuccessResponse<List<JobApplyDTO>> getJobApplyByJobSeekerProfile(JobPostSearchFilterRequest request);
+
+    List<JobApplyDetailDTO> getALlJobApplyByJobPostId(String id);
 }

@@ -1,6 +1,8 @@
 package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.business.RecruiterDTO;
+import com.jobportal.api.dto.profile.RecruiterProfileDTO;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.request.profile.UpdateRecruiterProfileRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.service.RecruiterService;
@@ -23,16 +25,16 @@ public class RecruiterController {
         this.recruiterService = recruiterService;
     }
 
-    @GetMapping
-    public ResponseEntity<SuccessResponse<List<RecruiterDTO>>> getAllRecruiters() {
-        List<RecruiterDTO> recruiterDTOS = recruiterService.getAllRecruiters();
-
-        SuccessResponse<List<RecruiterDTO>> successResponse = SuccessResponse.<List<RecruiterDTO>>builder()
-                .result(recruiterDTOS)
-                .build();
-
-        return ResponseEntity.ok(successResponse);
-    }
+//    @GetMapping
+//    public ResponseEntity<SuccessResponse<List<RecruiterDTO>>> getAllRecruiters() {
+//        List<RecruiterDTO> recruiterDTOS = recruiterService.getAllRecruiters();
+//
+//        SuccessResponse<List<RecruiterDTO>> successResponse = SuccessResponse.<List<RecruiterDTO>>builder()
+//                .result(recruiterDTOS)
+//                .build();
+//
+//        return ResponseEntity.ok(successResponse);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<RecruiterDTO>> getRecruiterById(@PathVariable("id") String id) {
@@ -66,5 +68,10 @@ public class RecruiterController {
                 .build();
 
         return ResponseEntity.ok(successResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<SuccessResponse<List<RecruiterProfileDTO>>> getAllRecruiterProfile(@ModelAttribute JobPostSearchFilterRequest request) {
+        return ResponseEntity.ok(recruiterService.getAllRecruiters(request));
     }
 }

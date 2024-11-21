@@ -1,6 +1,5 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.request.profile.UpdateInfoJobSeekerRequest;

@@ -1,10 +1,14 @@
 package com.jobportal.api.service;
 
 import com.jobportal.api.dto.business.RecruiterDTO;
+import com.jobportal.api.dto.profile.RecruiterProfileDTO;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.request.profile.UpdateRecruiterProfileRequest;
+import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
 import com.jobportal.api.mapper.RecruiterMapper;
+import com.jobportal.api.mapper.RecruiterProfileMapper;
 import com.jobportal.api.model.profile.Company;
 import com.jobportal.api.model.profile.RecruiterProfile;
 import com.jobportal.api.model.user.User;
@@ -14,6 +18,9 @@ import com.jobportal.api.repository.UserRepository;
 import com.jobportal.api.util.AuthUtil;
 import com.jobportal.api.util.S3Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,13 +35,15 @@ public class RecruiterServiceImpl implements RecruiterService {
     private final UserRepository userRepository;
     private final RecruiterProfileRepository recruiterRepository;
     private final RecruiterMapper recruiterMapper;
+    private final RecruiterProfileMapper recruiterProfileMapper;
 
     @Autowired
-    public RecruiterServiceImpl(CompanyRepository companyRepository, UserRepository userRepository, RecruiterProfileRepository recruiterRepository, RecruiterMapper recruiterMapper) {
+    public RecruiterServiceImpl(CompanyRepository companyRepository, UserRepository userRepository, RecruiterProfileRepository recruiterRepository, RecruiterMapper recruiterMapper, RecruiterProfileMapper recruiterProfileMapper) {
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.recruiterRepository = recruiterRepository;
         this.recruiterMapper = recruiterMapper;
+        this.recruiterProfileMapper = recruiterProfileMapper;
     }
 
     @Override
@@ -106,5 +115,31 @@ public class RecruiterServiceImpl implements RecruiterService {
         } catch (IOException e) {
             throw new CustomException(EnumException.ERROR_UPLOAD_FILE);
         }
+    }
+
+    @Override
+    public SuccessResponse<List<RecruiterProfileDTO>> getAllRecruiters(JobPostSearchFilterRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize());
+
+        Page<RecruiterProfile> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+            pageData = recruiterRepository.findByNameContainingIgnoreCase(request.getQuery(), pageable);
+        } else {
+            pageData = recruiterRepository.findAll(pageable);
+        }
+
+        return SuccessResponse.<List<RecruiterProfileDTO>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent().stream()
+                        .map(recruiterProfileMapper::toDTO)
+                        .toList())
+                .build();
     }
 }

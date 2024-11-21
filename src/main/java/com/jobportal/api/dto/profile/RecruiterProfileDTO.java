@@ -2,6 +2,7 @@ package com.jobportal.api.dto.profile;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.jobportal.api.model.profile.Company;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,28 +15,26 @@ import java.util.Date;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobSeekerProfileDTO {
+public class RecruiterProfileDTO {
 
     private String id;
 
     private String email;
 
-    private String fullName;
+    private String name;
 
     private boolean isActive;
 
     private boolean isLocked;
 
+    private Company company;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date registrationDate;
 
+    private String position;
+
     private String phone;
 
-    private String dob;
-
-    private String address;
-
-    private String workExperience;
-
-    private String avatar;
+    private String recruiterEmail;
 }

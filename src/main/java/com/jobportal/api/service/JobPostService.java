@@ -5,6 +5,7 @@ import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
+import com.jobportal.api.dto.request.job.JobPostUpdateRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,4 +33,7 @@ public interface JobPostService {
     SuccessResponse<List<JobPostDTO>> getJobPostByRecruiter(JobPostSearchFilterRequest request);
 
     SuccessResponse<List<JobPostDTO>> getJobPostByCompanyId(String id, JobPostSearchFilterRequest request);
+
+    @PostAuthorize("hasAuthority('SCOPE_RECRUITER')")
+    void updateJobPost(String id, JobPostUpdateRequest jobPostUpdateRequest);
 }

@@ -5,6 +5,7 @@ import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
+import com.jobportal.api.dto.request.job.JobPostUpdateRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.service.JobPostService;
 import jakarta.validation.Valid;
@@ -88,5 +89,16 @@ public class JobPostController {
     @GetMapping("/company/{id}")
     public ResponseEntity<SuccessResponse<List<JobPostDTO>>> getJobPostByCompanyId(@PathVariable("id") String id, @ModelAttribute JobPostSearchFilterRequest request) {
         return ResponseEntity.ok(jobPostService.getJobPostByCompanyId(id, request));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<SuccessResponse<Void>> updateJobPost(@PathVariable("id") String id, @Valid @RequestBody JobPostUpdateRequest jobPostUpdateRequest) {
+        jobPostService.updateJobPost(id, jobPostUpdateRequest);
+
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
+                .message("Cập nhật bài đăng việc làm thành công")
+                .build();
+
+        return ResponseEntity.ok(successResponse);
     }
 }

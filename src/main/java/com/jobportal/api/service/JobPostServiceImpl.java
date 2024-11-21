@@ -5,6 +5,7 @@ import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
+import com.jobportal.api.dto.request.job.JobPostUpdateRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
@@ -239,9 +240,9 @@ public class JobPostServiceImpl implements JobPostService {
 
         Sort sort;
         if ("oldest".equalsIgnoreCase(request.getOrder())) {
-            sort = Sort.by(Sort.Order.asc("createdDate"));
+            sort = Sort.by(Sort.Order.asc("updatedDate"));
         } else {
-            sort = Sort.by(Sort.Order.desc("createdDate"));
+            sort = Sort.by(Sort.Order.desc("updatedDate"));
         }
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
@@ -271,9 +272,9 @@ public class JobPostServiceImpl implements JobPostService {
     public SuccessResponse<List<JobPostDTO>> getJobPostByCompanyId(String id, JobPostSearchFilterRequest request) {
         Sort sort;
         if ("oldest".equalsIgnoreCase(request.getOrder())) {
-            sort = Sort.by(Sort.Order.asc("createdDate"));
+            sort = Sort.by(Sort.Order.asc("updatedDate"));
         } else {
-            sort = Sort.by(Sort.Order.desc("createdDate"));
+            sort = Sort.by(Sort.Order.desc("updatedDate"));
         }
         Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
 
@@ -297,5 +298,25 @@ public class JobPostServiceImpl implements JobPostService {
                         .map(jobPostMapper::mapJobPostToJobPostDTO)
                         .toList())
                 .build();
+    }
+
+    @Override
+    public void updateJobPost(String id, JobPostUpdateRequest jobPostUpdateRequest) {
+        JobPost jobPost = jobPostRepository.findById(id)
+                .orElseThrow(() -> new CustomException(EnumException.JOB_POST_NOT_FOUND));
+
+        jobPost.setTitle(jobPostUpdateRequest.getTitle());
+        jobPost.setType(jobPostUpdateRequest.getType());
+        jobPost.setRemote(jobPostUpdateRequest.getRemote());
+        jobPost.setDescription(jobPostUpdateRequest.getDescription());
+        jobPost.setSalary(jobPostUpdateRequest.getSalary());
+        jobPost.setQuantity(jobPostUpdateRequest.getQuantity());
+        jobPost.setUpdatedDate(Date.from(Instant.now()));
+        jobPost.setExpiryDate(jobPostUpdateRequest.getExpiryDate());
+        jobPost.setRequirements(jobPostUpdateRequest.getRequirements());
+        jobPost.setBenefits(jobPostUpdateRequest.getBenefits());
+        jobPost.setAddress(jobPostUpdateRequest.getAddress());
+
+        jobPostRepository.save(jobPost);
     }
 }

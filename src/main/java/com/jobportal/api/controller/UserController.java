@@ -2,6 +2,7 @@ package com.jobportal.api.controller;
 
 import com.jobportal.api.dto.request.user.CreateUserRequest;
 import com.jobportal.api.dto.request.user.UpdateUserRequest;
+import com.jobportal.api.dto.request.user.UserLockRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.service.UserService;
@@ -79,6 +80,15 @@ public class UserController {
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("User deleted successfully - id: " + id)
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @PostMapping("/lock")
+    public ResponseEntity<SuccessResponse<Void>> lockUser(@RequestBody UserLockRequest userLockRequest) {
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
+                .message(userService.lockUser(userLockRequest.getId()) ? "Khóa tài khoản thành công" : "Mở khóa tài khoản thành công")
                 .build();
 
         return ResponseEntity.ok(successResponse);

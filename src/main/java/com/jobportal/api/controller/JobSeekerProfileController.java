@@ -1,5 +1,7 @@
 package com.jobportal.api.controller;
 
+import com.jobportal.api.dto.profile.JobSeekerProfileDTO;
+import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.request.profile.UpdateInfoJobSeekerRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
 import com.jobportal.api.model.profile.JobSeekerProfile;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/job-seeker")
@@ -41,5 +45,10 @@ public class JobSeekerProfileController {
                 .build();
 
         return ResponseEntity.ok(successResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<SuccessResponse<List<JobSeekerProfileDTO>>> getAllJobSeekerProfile(@ModelAttribute JobPostSearchFilterRequest request) {
+        return ResponseEntity.ok(jobSeekerProfileService.getAllJobSeekers(request));
     }
 }

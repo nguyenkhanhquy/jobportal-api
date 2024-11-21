@@ -94,7 +94,7 @@ public class JobApplyServiceImpl implements JobApplyService {
         try (InputStream inputStream = multipart.getInputStream()) {
             // Tạo tên file mới với phần mở rộng từ file gốc
             String fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-            String newFileName = "cv/" + user.getId() + "/cv" + System.currentTimeMillis() + fileExtension;
+            String newFileName = "cv/" + user.getId() + "/cv" + System.currentTimeMillis() + "/" + fileName;
 
             // Upload tệp lên S3
             S3Util.uploadFile(newFileName, inputStream);

@@ -1,6 +1,5 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
@@ -152,7 +151,7 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     @Override
-    public SuccessResponse<List<JobPostBasicDTO>> getPopularJobPosts(JobPostSearchFilterRequest request) {
+    public SuccessResponse<List<JobPostDetailDTO>> getPopularJobPosts(JobPostSearchFilterRequest request) {
         Sort sort;
         if ("oldest".equalsIgnoreCase(request.getOrder())) {
             sort = Sort.by(Sort.Order.asc("createdDate"));
@@ -168,7 +167,7 @@ public class JobPostServiceImpl implements JobPostService {
             pageData = jobPostRepository.findAllByisHidden(false, pageable);
         }
 
-        return SuccessResponse.<List<JobPostBasicDTO>>builder()
+        return SuccessResponse.<List<JobPostDetailDTO>>builder()
                 .pageInfo(SuccessResponse.PageInfo.builder()
                         .currentPage(request.getPage())
                         .totalPages(pageData.getTotalPages())
@@ -178,7 +177,7 @@ public class JobPostServiceImpl implements JobPostService {
                         .hasNextPage(pageData.hasNext())
                         .build())
                 .result(pageData.getContent().stream()
-                        .map(jobPostMapper::mapJobPostToJobPostBasicDTO)
+                        .map(jobPostMapper::mapJobPostToJobPostDetailDTO)
                         .toList())
                 .build();
     }

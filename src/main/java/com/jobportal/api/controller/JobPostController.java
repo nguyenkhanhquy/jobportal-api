@@ -1,6 +1,5 @@
 package com.jobportal.api.controller;
 
-import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
@@ -40,7 +39,7 @@ public class JobPostController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<SuccessResponse<List<JobPostBasicDTO>>> getPopularJobPosts(@ModelAttribute JobPostSearchFilterRequest request) {
+    public ResponseEntity<SuccessResponse<List<JobPostDetailDTO>>> getPopularJobPosts(@ModelAttribute JobPostSearchFilterRequest request) {
         return ResponseEntity.ok(jobPostService.getPopularJobPosts(request));
     }
 

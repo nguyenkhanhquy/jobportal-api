@@ -1,6 +1,5 @@
 package com.jobportal.api.service;
 
-import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
@@ -19,7 +18,7 @@ public interface JobPostService {
 
     SuccessResponse<List<JobPostDetailDTO>> getAllJobPosts(JobPostSearchFilterRequest request);
 
-    SuccessResponse<List<JobPostBasicDTO>> getPopularJobPosts(JobPostSearchFilterRequest request);
+    SuccessResponse<List<JobPostDetailDTO>> getPopularJobPosts(JobPostSearchFilterRequest request);
 
     JobPostDetailDTO getJobPostById(String id);
 

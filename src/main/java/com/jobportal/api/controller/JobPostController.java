@@ -4,6 +4,7 @@ import com.jobportal.api.dto.job.jobpost.JobPostBasicDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDTO;
 import com.jobportal.api.dto.job.jobpost.JobPostDetailDTO;
 import com.jobportal.api.dto.request.job.CreateJobPostRequest;
+import com.jobportal.api.dto.request.job.JobPostHiddenRequest;
 import com.jobportal.api.dto.request.job.JobPostSearchFilterRequest;
 import com.jobportal.api.dto.request.job.JobPostUpdateRequest;
 import com.jobportal.api.dto.response.SuccessResponse;
@@ -26,6 +27,11 @@ public class JobPostController {
     @Autowired
     public JobPostController(JobPostService jobPostService) {
         this.jobPostService = jobPostService;
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<SuccessResponse<List<JobPostDetailDTO>>> getAllJobPostsAdmin(@ModelAttribute JobPostSearchFilterRequest request) {
+        return ResponseEntity.ok(jobPostService.getAllJobPostsAdmin(request));
     }
 
     @GetMapping
@@ -97,6 +103,19 @@ public class JobPostController {
 
         SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
                 .message("Cập nhật bài đăng việc làm thành công")
+                .build();
+
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @PostMapping("/hidden")
+    public ResponseEntity<SuccessResponse<Void>> hiddenJobPost(@RequestBody JobPostHiddenRequest request) {
+        String message = jobPostService.hiddenJobPost(request.getId())
+                ? "Ẩn bài đăng thành công"
+                : "Hiện bài đăng thành công";
+
+        SuccessResponse<Void> successResponse = SuccessResponse.<Void>builder()
+                .message(message)
                 .build();
 
         return ResponseEntity.ok(successResponse);

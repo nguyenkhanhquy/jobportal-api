@@ -18,6 +18,21 @@ public interface JobPostRepository extends MongoRepository<JobPost, String> {
 
     Page<JobPost> findByCompanyId(String companyId, Pageable pageable);
 
+    @Query("{'$and': [" +
+            "{'isHidden': false}," +
+            "{'$or': [" +
+            "{'title': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'type': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'remote': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'description': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'salary': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'companyName': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'jobPosition': {'$regex': ?0, '$options': 'i'}}, " +
+            "{'address': {'$regex': ?0, '$options': 'i'}} " +
+            "]}" +
+            "]}")
+    Page<JobPost> searchByKeyword(String keyword, Pageable pageable);
+
     @Query("{'$or': [" +
             "{'title': {'$regex': ?0, '$options': 'i'}}, " +
             "{'type': {'$regex': ?0, '$options': 'i'}}, " +
@@ -28,5 +43,7 @@ public interface JobPostRepository extends MongoRepository<JobPost, String> {
             "{'jobPosition': {'$regex': ?0, '$options': 'i'}}, " +
             "{'address': {'$regex': ?0, '$options': 'i'}} " +
             "]}")
-    Page<JobPost> searchByKeyword(String keyword, Pageable pageable);
+    Page<JobPost> searchByKeywordAdmin(String keyword, Pageable pageable);
+
+    Page<JobPost> findAllByisHidden(boolean isHidden, Pageable pageable);
 }

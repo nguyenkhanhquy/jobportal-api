@@ -54,6 +54,9 @@ public class JobPost {
     private String address;
 
     @Builder.Default
+    private boolean isHidden = false;
+
+    @Builder.Default
     private List<JobApply> jobApplies = new ArrayList<>();
 
     public int getJobApplyCount() {

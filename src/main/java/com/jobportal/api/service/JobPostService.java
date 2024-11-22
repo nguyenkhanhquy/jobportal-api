@@ -15,6 +15,8 @@ import java.util.Map;
 
 public interface JobPostService {
 
+    SuccessResponse<List<JobPostDetailDTO>> getAllJobPostsAdmin(JobPostSearchFilterRequest request);
+
     SuccessResponse<List<JobPostDetailDTO>> getAllJobPosts(JobPostSearchFilterRequest request);
 
     SuccessResponse<List<JobPostBasicDTO>> getPopularJobPosts(JobPostSearchFilterRequest request);
@@ -36,4 +38,7 @@ public interface JobPostService {
 
     @PostAuthorize("hasAuthority('SCOPE_RECRUITER')")
     void updateJobPost(String id, JobPostUpdateRequest jobPostUpdateRequest);
+
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    boolean hiddenJobPost(String id);
 }

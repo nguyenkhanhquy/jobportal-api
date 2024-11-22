@@ -53,4 +53,6 @@ public class JobPostDetailDTO {
 //    private List<JobApply> jobApplies;
 
     private boolean isSaved;
+
+    private boolean isHidden;
 }

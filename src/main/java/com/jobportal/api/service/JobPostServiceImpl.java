@@ -43,6 +43,42 @@ public class JobPostServiceImpl implements JobPostService {
     private final JobPostMapper jobPostMapper;
 
     @Override
+    public SuccessResponse<List<JobPostDetailDTO>> getAllJobPostsAdmin(JobPostSearchFilterRequest request) {
+        Sort sort;
+        if ("oldest".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.asc("createdDate"));
+        } else if ("recentUpdate".equalsIgnoreCase(request.getOrder())) {
+            sort = Sort.by(Sort.Order.desc("updatedDate"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdDate"));
+        }
+        Pageable pageable = PageRequest.of(request.getPage() - 1, request.getSize(), sort);
+
+        Page<JobPost> pageData;
+        if (request.getQuery() != null && !request.getQuery().isBlank()) {
+//            pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
+            pageData = jobPostRepository.searchByKeywordAdmin(request.getQuery(), pageable);
+        } else {
+            pageData = jobPostRepository.findAll(pageable);
+        }
+
+        return SuccessResponse.<List<JobPostDetailDTO>>builder()
+                .pageInfo(SuccessResponse.PageInfo.builder()
+                        .currentPage(request.getPage())
+                        .totalPages(pageData.getTotalPages())
+                        .pageSize(pageData.getSize())
+                        .totalElements(pageData.getTotalElements())
+                        .hasPreviousPage(pageData.hasPrevious())
+                        .hasNextPage(pageData.hasNext())
+                        .build())
+                .result(pageData.getContent().stream()
+                        .map(jobPostMapper::mapJobPostToJobPostDetailDTO)
+                        .toList())
+                .build();
+
+    }
+
+    @Override
     public SuccessResponse<List<JobPostDetailDTO>> getAllJobPosts(JobPostSearchFilterRequest request) {
         Sort sort;
         if ("oldest".equalsIgnoreCase(request.getOrder())) {
@@ -59,7 +95,7 @@ public class JobPostServiceImpl implements JobPostService {
 //            pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
             pageData = jobPostRepository.searchByKeyword(request.getQuery(), pageable);
         } else {
-            pageData = jobPostRepository.findAll(pageable);
+            pageData = jobPostRepository.findAllByisHidden(false, pageable);
         }
 
         try {
@@ -129,7 +165,7 @@ public class JobPostServiceImpl implements JobPostService {
         if (request.getQuery() != null && !request.getQuery().isBlank()) {
             pageData = jobPostRepository.findByTitleContainingIgnoreCase(request.getQuery(), pageable);
         } else {
-            pageData = jobPostRepository.findAll(pageable);
+            pageData = jobPostRepository.findAllByisHidden(false, pageable);
         }
 
         return SuccessResponse.<List<JobPostBasicDTO>>builder()
@@ -322,5 +358,17 @@ public class JobPostServiceImpl implements JobPostService {
         jobPost.setAddress(jobPostUpdateRequest.getAddress());
 
         jobPostRepository.save(jobPost);
+    }
+
+    @Override
+    public boolean hiddenJobPost(String id) {
+        JobPost jobPost = jobPostRepository.findById(id)
+                .orElseThrow(() -> new CustomException(EnumException.JOB_POST_NOT_FOUND));
+
+        jobPost.setHidden(!jobPost.isHidden());
+
+        jobPostRepository.save(jobPost);
+
+        return jobPost.isHidden();
     }
 }

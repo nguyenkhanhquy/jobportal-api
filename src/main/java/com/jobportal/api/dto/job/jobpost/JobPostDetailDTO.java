@@ -50,8 +50,6 @@ public class JobPostDetailDTO {
 
     private String address;
 
-//    private List<JobApply> jobApplies;
-
     private boolean isSaved;
 
     private boolean isHidden;

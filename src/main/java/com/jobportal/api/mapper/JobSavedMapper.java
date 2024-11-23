@@ -12,6 +12,7 @@ public interface JobSavedMapper {
     @Mapping(source = "jobPost.title", target = "title")
     @Mapping(source = "jobPost.jobPosition", target = "jobPosition")
     @Mapping(source = "jobPost.company.name", target = "companyName")
+    @Mapping(source = "jobPost.company", target = "company")
     @Mapping(source = "jobPost.expiryDate", target = "expiryDate")
     JobSavedDTO mapJobSavedToJobSavedDTO(JobSaved jobSaved);
 }

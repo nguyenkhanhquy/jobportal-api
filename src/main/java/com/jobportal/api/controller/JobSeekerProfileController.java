@@ -29,7 +29,7 @@ public class JobSeekerProfileController {
         JobSeekerProfile jobSeekerProfile = jobSeekerProfileService.updateAvatar(multipart);
 
         SuccessResponse<JobSeekerProfile> successResponse = SuccessResponse.<JobSeekerProfile>builder()
-                .message("Your file has been uploaded successfully")
+                .message("Cập nhật ảnh đại diện thành công")
                 .result(jobSeekerProfile)
                 .build();
 

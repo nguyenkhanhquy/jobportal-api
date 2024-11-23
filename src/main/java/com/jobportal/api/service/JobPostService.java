@@ -14,6 +14,7 @@ import java.util.Map;
 
 public interface JobPostService {
 
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     SuccessResponse<List<JobPostDetailDTO>> getAllJobPostsAdmin(JobPostSearchFilterRequest request);
 
     SuccessResponse<List<JobPostDetailDTO>> getAllJobPosts(JobPostSearchFilterRequest request);

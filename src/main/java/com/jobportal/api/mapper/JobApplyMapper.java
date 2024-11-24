@@ -13,6 +13,7 @@ public interface JobApplyMapper {
     @Mapping(source = "jobPost.title", target = "title")
     @Mapping(source = "jobPost.jobPosition", target = "jobPosition")
     @Mapping(source = "jobPost.company.name", target = "companyName")
+    @Mapping(source = "jobPost.company", target = "company")
     JobApplyDTO mapJobApplyToJobApplyDTO(JobApply jobApply);
 
     @Mapping(source = "jobSeekerProfile.fullName", target = "name")

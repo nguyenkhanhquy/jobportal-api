@@ -86,7 +86,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = generateToken(user);
-        return Map.of("token", token);
+        return Map.of(
+                "token", token,
+                "role", user.getRole().getName()
+        );
     }
 
     @Override

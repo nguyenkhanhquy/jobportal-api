@@ -4,7 +4,7 @@ import com.jobportal.api.dto.request.auth.*;
 import com.jobportal.api.dto.user.UserDTO;
 import com.jobportal.api.exception.CustomException;
 import com.jobportal.api.exception.EnumException;
-import com.jobportal.api.mapper.RecruiterMapper;
+import com.jobportal.api.mapper.RecruiterProfileMapper;
 import com.jobportal.api.mapper.UserMapper;
 import com.jobportal.api.model.profile.Company;
 import com.jobportal.api.model.profile.JobSeekerProfile;
@@ -18,7 +18,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     @Value("${jwt.signerkey}")
@@ -48,26 +49,11 @@ public class AuthServiceImpl implements AuthService {
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final CompanyRepository companyRepository;
     private final RecruiterProfileRepository recruiterRepository;
-    private final RecruiterMapper recruiterMapper;
+    private final RecruiterProfileMapper recruiterProfileMapper;
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository, JobSeekerProfileRepository jobSeekerProfileRepository, InvalidatedTokenRepository invalidatedTokenRepository, CompanyRepository companyRepository, RecruiterProfileRepository recruiterRepository, RecruiterMapper recruiterMapper, OtpService otpService, EmailService emailService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.jobSeekerProfileRepository = jobSeekerProfileRepository;
-        this.invalidatedTokenRepository = invalidatedTokenRepository;
-        this.companyRepository = companyRepository;
-        this.recruiterRepository = recruiterRepository;
-        this.recruiterMapper = recruiterMapper;
-        this.otpService = otpService;
-        this.emailService = emailService;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public Map<String, Object> login(LoginRequest loginRequest) {
@@ -295,7 +281,7 @@ public class AuthServiceImpl implements AuthService {
             if (recruiterProfile == null) {
                 throw new CustomException(EnumException.PROFILE_NOT_FOUND);
             }
-            return recruiterMapper.mapRecruiterToRecruiterDTO(recruiterProfile);
+            return recruiterProfileMapper.toDTO(recruiterProfile);
         } else {
             throw new CustomException(EnumException.PROFILE_NOT_FOUND);
         }

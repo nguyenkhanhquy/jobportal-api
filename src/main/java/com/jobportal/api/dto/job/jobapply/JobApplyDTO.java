@@ -19,6 +19,8 @@ public class JobApplyDTO {
 
     private String id;
 
+    private String jobPostId;
+
     private String title;
 
     private String jobPosition;
